@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Admin Categories
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="admin.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Admin Panel
+        </div>
+
+
+        <div class="nav-right">
+
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="products.html"
+                class="nav-link"
+            >
+                Products
+            </a>
+
+
+            <span id="userInfo">
+                Loading...
+            </span>
+
+
+            <button
+                type="button"
+                class="logout-btn"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <div class="dashboard-container">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="dashboard-header">
+
+            <div>
+
+                <h1>
+                    Categories
+                </h1>
+
+                <p>
+                    Manage your product categories.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="addCategoryButton"
+            >
+                + Add Category
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             MESSAGE
+             ================================================= -->
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <!-- =================================================
+             CATEGORY TABLE
+             ================================================= -->
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="categoryTableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="loading-cell"
+                        >
+                            Loading categories...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         ADD / EDIT CATEGORY MODAL
+         ===================================================== -->
+
+    <div
+        id="categoryModal"
+        class="modal"
+    >
+
+        <div class="modal-content">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="modal-header">
+
+                <h2 id="modalTitle">
+                    Add Category
+                </h2>
+
+
+                <button
+                    type="button"
+                    id="closeCategoryModal"
+                    class="close-btn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- CATEGORY FORM -->
+
+            <form id="categoryForm">
+
+
+                <!-- Hidden Category ID -->
+
+                <input
+                    type="hidden"
+                    id="categoryId"
+                >
+
+
+                <!-- CATEGORY NAME -->
+
+                <div class="form-group">
+
+                    <label
+                        for="categoryName"
+                    >
+                        Category Name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="categoryName"
+                        placeholder="Enter category name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label
+                        for="categoryDescription"
+                    >
+                        Description
+                    </label>
+
+
+                    <textarea
+                        id="categoryDescription"
+                        rows="4"
+                        placeholder="Enter category description"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- SAVE BUTTON -->
+
+                <button
+                    type="submit"
+                    id="saveCategoryButton"
+                >
+                    Create Category
+                </button>
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SHARED AUTH
+         ===================================================== -->
+
+    <script
+        src="../shared/auth.js"
+    ></script>
+
+
+    <!-- =====================================================
+         CATEGORY JAVASCRIPT
+         ===================================================== -->
+
+    <script
+        src="categories.js"
+    ></script>
+
+
+</body>
+
+</html>

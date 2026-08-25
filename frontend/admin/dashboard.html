@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+    <!-- CHART.JS LIBRARY -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" style="display: flex; flex-direction: column; justify-content: space-between; height: 100vh;">
+        <div>
+            <div class="sidebar-logo">
+                <span class="logo-icon">🅰️</span>
+                <span>Admin Panel</span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="sidebar-link active"><span class="sidebar-icon">📊</span> Dashboard</a>
+                <a href="products.html" class="sidebar-link"><span class="sidebar-icon">📦</span> Products</a>
+                <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🗂️</span> Categories</a>
+                <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+            </nav>
+        </div>
+        <div style="padding: 1.5rem;">
+            <button onclick="logoutUser()" style="width: 100%; background: #ef4444; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                🚪 Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">ADMIN MANAGEMENT</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Dashboard Overview</h1>
+            </div>
+        </header>
+
+        <!-- STATS COUNTERS -->
+        <section class="statistics-grid" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem;">
+            <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Products</span>
+                <h2 id="totalProducts" style="margin: 0.5rem 0 0 0; font-size: 1.8rem; color: #1f2937;">0</h2>
+            </div>
+            <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <span style="color: #6b7280; font-size: 0.9rem;">Categories</span>
+                <h2 id="totalCategories" style="margin: 0.5rem 0 0 0; font-size: 1.8rem; color: #1f2937;">0</h2>
+            </div>
+            <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Stock</span>
+                <h2 id="totalStock" style="margin: 0.5rem 0 0 0; font-size: 1.8rem; color: #1f2937;">0</h2>
+            </div>
+            <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Orders</span>
+                <h2 id="totalOrders" style="margin: 0.5rem 0 0 0; font-size: 1.8rem; color: #1f2937;">0</h2>
+            </div>
+            <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Users</span>
+                <h2 id="totalUsers" style="margin: 0.5rem 0 0 0; font-size: 1.8rem; color: #1f2937;">0</h2>
+            </div>
+        </section>
+
+        <!-- CHARTS SECTION -->
+        <section style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; font-size: 1.1rem; color: #1f2937;">Products by Category</h3>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; font-size: 1.1rem; color: #1f2937;">Stock Overview</h3>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- REDESIGNED ORDER STATUS OVERVIEW SECTION -->
+        <section style="margin-top: 1.5rem; background: #ffffff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+            <div style="margin-bottom: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #1f2937; font-weight: 700;">Order Status Overview</h3>
+                <span style="font-size: 0.85rem; color: #6b7280;">Live fulfillment breakdown across all orders</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; align-items: center;">
+                <!-- Left: Status Breakdown Cards -->
+                <div id="statusCardsContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;">
+                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.85rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: #92400e; font-weight: 600; display: block;">Pending</span>
+                        <strong id="countPending" style="font-size: 1.4rem; color: #78350f;">0</strong>
+                    </div>
+                    <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 0.85rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: #1e40af; font-weight: 600; display: block;">Accepted</span>
+                        <strong id="countAccepted" style="font-size: 1.4rem; color: #1e3a8a;">0</strong>
+                    </div>
+                    <div style="background: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 0.85rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: #6b21a8; font-weight: 600; display: block;">Shipped</span>
+                        <strong id="countShipped" style="font-size: 1.4rem; color: #581c87;">0</strong>
+                    </div>
+                    <div style="background: #dcfce7; border-left: 4px solid #22c55e; padding: 0.85rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: #166534; font-weight: 600; display: block;">Delivered</span>
+                        <strong id="countDelivered" style="font-size: 1.4rem; color: #14532d;">0</strong>
+                    </div>
+                    <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 0.85rem; border-radius: 8px; grid-column: span 2;">
+                        <span style="font-size: 0.8rem; color: #991b1b; font-weight: 600; display: block;">Rejected</span>
+                        <strong id="countRejected" style="font-size: 1.4rem; color: #7f1d1d;">0</strong>
+                    </div>
+                </div>
+
+                <!-- Right: Centered Doughnut Chart -->
+                <div style="height: 240px; position: relative; display: flex; justify-content: center; align-items: center;">
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Seller Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="seller.css"
+    >
+
+</head>
+
+<body>
+
+
+    <!-- ============================================= -->
+    <!-- NAVBAR -->
+    <!-- ============================================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Seller Panel
+        </div>
+
+
+        <div class="nav-right">
+
+            <span id="userInfo">
+                Loading...
+            </span>
+
+
+            <button
+                class="logout-btn"
+                onclick="logout()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ============================================= -->
+    <!-- DASHBOARD -->
+    <!-- ============================================= -->
+
+    <div class="dashboard-container">
+
+
+        <div class="dashboard-header">
+
+            <h1>
+                Seller Dashboard
+            </h1>
+
+            <p>
+                Manage your products.
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-grid">
+
+
+            <!-- PRODUCTS -->
+
+            <a
+                href="../index.html"
+                class="dashboard-card"
+            >
+
+                <div class="card-icon">
+                    📦
+                </div>
+
+                <h2>
+                    My Products
+                </h2>
+
+                <p>
+                    Add, update and manage products.
+                </p>
+
+            </a>
+
+
+            <!-- PROFILE -->
+
+            <a
+                href="#"
+                class="dashboard-card"
+            >
+
+                <div class="card-icon">
+                    👤
+                </div>
+
+                <h2>
+                    My Profile
+                </h2>
+
+                <p>
+                    View your account information.
+                </p>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================= -->
+    <!-- AUTH -->
+    <!-- ============================================= -->
+
+    <script src="../shared/auth.js"></script>
+
+
+    <script>
+
+        async function loadDashboard() {
+
+            const user = await verifyUser();
+
+            if (!user) {
+                return;
+            }
+
+
+            if (user.role !== "SELLER") {
+
+                alert(
+                    "You do not have permission to access this page."
+                );
+
+                redirectToDashboard();
+
+                return;
+
+            }
+
+
+            document.getElementById(
+                "userInfo"
+            ).textContent =
+                `${user.username} (${user.role})`;
+
+        }
+
+
+        loadDashboard();
+
+    </script>
+
+<script src="../shared/auth.js"></script>
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+        await protectPage([
+            "SUPERADMIN",
+            "ADMIN",
+            "SELLER"
+        ]);
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

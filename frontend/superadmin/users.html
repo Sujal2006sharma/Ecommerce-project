@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - SuperAdmin</title>
+    <link rel="stylesheet" href="../admin/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar" style="display: flex; flex-direction: column; justify-content: space-between; height: 100vh;">
+        <div>
+            <div class="sidebar-logo">
+                <span class="logo-icon">🛡️</span>
+                <span>SuperAdmin Panel</span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+                <a href="users.html" class="sidebar-link active"><span class="sidebar-icon">👥</span> Users</a>
+                <a href="roles.html" class="sidebar-link"><span class="sidebar-icon">🛡️</span> Roles</a>
+                <a href="products.html" class="sidebar-link"><span class="sidebar-icon">📦</span> Products</a>
+                <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🗂️</span> Categories</a>
+                <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+            </nav>
+        </div>
+        <div style="padding: 1.5rem;">
+            <button onclick="logoutUser()" style="width: 100%; background: #ef4444; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                🚪 Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">USER MANAGEMENT</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">System Users</h1>
+            </div>
+            <button id="openAddUserModal" style="background: #2563eb; color: #fff; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                + Add User
+            </button>
+        </header>
+
+        <section class="statistics-grid" style="margin-top: 1.5rem;">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <span>Total Registered Users</span>
+                    <h2 id="totalUserCount">0</h2>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-card" style="margin-top: 1.5rem; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f3f4f6; color: #4b5563;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">Username</th>
+                            <th style="padding: 12px;">Email</th>
+                            <th style="padding: 12px;">Role</th>
+                            <th style="padding: 12px;">Status</th>
+                            <th style="padding: 12px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="6" style="padding: 12px; text-align: center;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ADD USER MODAL -->
+<div id="userModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="modal-content" style="background: white; padding: 2rem; border-radius: 8px; width: 400px; max-width: 90%;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="margin: 0;">Create New User</h2>
+            <button id="closeUserModal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        <form id="createUserForm">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Username</label>
+                <input type="text" id="newUsername" required placeholder="Enter username" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Email Address</label>
+                <input type="email" id="newUserEmail" required placeholder="Enter email" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Password</label>
+                <input type="password" id="newUserPassword" required placeholder="Enter password" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Role</label>
+                <select id="newUserRole" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="2">ADMIN</option>
+                    <option value="3">SELLER</option>
+                    <option value="4">CUSTOMER</option>
+                </select>
+            </div>
+            <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                Create User
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="users.js"></script>
+</body>
+</html>

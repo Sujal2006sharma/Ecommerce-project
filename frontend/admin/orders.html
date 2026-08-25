@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Admin Orders
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="admin.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Admin Panel
+        </div>
+
+
+        <div class="nav-right">
+
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="products.html"
+                class="nav-link"
+            >
+                Products
+            </a>
+
+
+            <a
+                href="categories.html"
+                class="nav-link"
+            >
+                Categories
+            </a>
+
+
+            <a
+                href="users.html"
+                class="nav-link"
+            >
+                Users
+            </a>
+
+
+            <a
+                href="orders.html"
+                class="nav-link"
+            >
+                Orders
+            </a>
+
+
+            <span id="userInfo">
+                Loading...
+            </span>
+
+
+            <button
+                type="button"
+                class="logout-btn"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="dashboard-container">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="dashboard-header">
+
+            <div>
+
+                <h1>
+                    Orders
+                </h1>
+
+                <p>
+                    View and manage customer orders.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="loadOrders()"
+            >
+                Refresh Orders
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MESSAGE
+             ================================================= -->
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+
+        <!-- =================================================
+             ORDER TABLE
+             ================================================= -->
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Order ID
+                        </th>
+
+                        <th>
+                            Customer
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th>
+                            Items
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Created At
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="orderTableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="loading-cell"
+                        >
+                            Loading orders...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         AUTH
+         ===================================================== -->
+
+    <script
+        src="../shared/auth.js"
+    ></script>
+
+
+    <!-- =====================================================
+         ORDERS JAVASCRIPT
+         ===================================================== -->
+
+    <script
+        src="orders.js"
+    ></script>
+
+
+</body>
+
+</html>

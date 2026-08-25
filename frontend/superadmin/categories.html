@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories - SuperAdmin</title>
+    <link rel="stylesheet" href="../admin/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🛡️</span>
+            <span>SuperAdmin Panel</span>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+            <a href="roles.html" class="sidebar-link"><span class="sidebar-icon">🛡️</span> Roles</a>
+            <a href="products.html" class="sidebar-link"><span class="sidebar-icon">📦</span> Products</a>
+            <a href="categories.html" class="sidebar-link active"><span class="sidebar-icon">🗂️</span> Categories</a>
+            <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">PRODUCT CLASSIFICATION</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Categories</h1>
+            </div>
+            <button type="button" id="addCategoryButton" style="background: #2563eb; color: #fff; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                + Add Category
+            </button>
+        </header>
+
+        <div id="message" class="message"></div>
+
+        <section class="table-card" style="margin-top: 1.5rem; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f3f4f6; color: #4b5563;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">Name</th>
+                            <th style="padding: 12px;">Description</th>
+                            <th style="padding: 12px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryTableBody">
+                        <tr><td colspan="4" style="padding: 12px; text-align: center;">Loading categories...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div id="categoryModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Category</h2>
+            <button type="button" id="closeCategoryModal" class="close-btn">×</button>
+        </div>
+        <form id="categoryForm">
+            <input type="hidden" id="categoryId">
+            <div class="form-group">
+                <label for="categoryName">Category Name</label>
+                <input type="text" id="categoryName" placeholder="Enter category name" required>
+            </div>
+            <div class="form-group">
+                <label for="categoryDescription">Description</label>
+                <textarea id="categoryDescription" rows="4" placeholder="Enter category description"></textarea>
+            </div>
+            <button type="submit" id="saveCategoryButton">Create Category</button>
+        </form>
+    </div>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="categories.js"></script>
+</body>
+</html>

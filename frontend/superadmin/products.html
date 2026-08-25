@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products - SuperAdmin</title>
+    <link rel="stylesheet" href="../admin/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🛡️</span>
+            <span>SuperAdmin Panel</span>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+            <a href="roles.html" class="sidebar-link"><span class="sidebar-icon">🛡️</span> Roles</a>
+            <a href="products.html" class="sidebar-link active"><span class="sidebar-icon">📦</span> Products</a>
+            <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🗂️</span> Categories</a>
+            <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">INVENTORY MANAGEMENT</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Products</h1>
+            </div>
+            <button type="button" id="addProductButton" style="background: #2563eb; color: #fff; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                + Add Product
+            </button>
+        </header>
+
+        <div id="message" class="message"></div>
+
+        <section class="table-card" style="margin-top: 1.5rem; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f3f4f6; color: #4b5563;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">Name</th>
+                            <th style="padding: 12px;">Category</th>
+                            <th style="padding: 12px;">Price</th>
+                            <th style="padding: 12px;">Quantity</th>
+                            <th style="padding: 12px;">Status</th>
+                            <th style="padding: 12px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <tr><td colspan="7" style="padding: 12px; text-align: center;">Loading products...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div id="productModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Product</h2>
+            <button type="button" id="closeProductModal" class="close-btn">×</button>
+        </div>
+        <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" placeholder="Enter product name" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Price</label>
+                <input type="number" id="productPrice" step="0.01" min="0" placeholder="Enter price" required>
+            </div>
+            <div class="form-group">
+                <label for="productQuantity">Quantity</label>
+                <input type="number" id="productQuantity" min="0" placeholder="Enter quantity" required>
+            </div>
+            <div class="form-group">
+                <label for="productCategory">Category</label>
+                <select id="productCategory" required><option value="">Select Category</option></select>
+            </div>
+            <button type="submit" id="saveProductButton">Save Product</button>
+        </form>
+    </div>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="products.js"></script>
+</body>
+</html>

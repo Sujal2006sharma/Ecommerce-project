@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperAdmin Dashboard</title>
+    <link rel="stylesheet" href="../admin/admin.css">
+    <!-- CHART.JS LIBRARY -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+    <!-- FIXED SIDEBAR -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-logo">
+                <span class="logo-icon">🛡️</span>
+                <span>SuperAdmin Panel</span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="sidebar-link active"><span class="sidebar-icon">📊</span> Dashboard</a>
+                <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+                <a href="roles.html" class="sidebar-link"><span class="sidebar-icon">🛡️</span> Roles</a>
+                <a href="products.html" class="sidebar-link"><span class="sidebar-icon">📦</span> Products</a>
+                <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🗂️</span> Categories</a>
+                <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+            </nav>
+        </div>
+        <div style="padding: 1.5rem;">
+            <button onclick="logoutUser()" class="sidebar-logout">
+                🚪 Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">SUPERADMIN CONTROL PANEL</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Dashboard Overview</h1>
+            </div>
+        </header>
+
+        <!-- STATS COUNTERS -->
+        <section class="statistics-grid">
+            <div class="stat-card">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Products</span>
+                <h2 id="totalProducts">0</h2>
+            </div>
+            <div class="stat-card">
+                <span style="color: #6b7280; font-size: 0.9rem;">Categories</span>
+                <h2 id="totalCategories">0</h2>
+            </div>
+            <div class="stat-card">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Stock</span>
+                <h2 id="totalStock">0</h2>
+            </div>
+            <div class="stat-card">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Orders</span>
+                <h2 id="totalOrders">0</h2>
+            </div>
+            <div class="stat-card">
+                <span style="color: #6b7280; font-size: 0.9rem;">Total Revenue</span>
+                <h2 id="totalRevenue">₹0</h2>
+            </div>
+        </section>
+
+        <!-- CHARTS SECTION -->
+        <section style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <!-- REVENUE TREND -->
+            <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0; font-size: 1.1rem; color: #1f2937;">Revenue Trend</h3>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ORDER STATUS WITH REAL DATA CARDS & ANIMATED ROUND CHART -->
+            <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+                <div style="margin-bottom: 1rem;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #1f2937; font-weight: 700;">Order Status Overview</h3>
+                    <span style="font-size: 0.8rem; color: #6b7280;">Live fulfillment breakdown</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+                    <!-- Real Data Status Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem;">
+                        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.6rem; border-radius: 6px;">
+                            <span style="font-size: 0.75rem; color: #92400e; font-weight: 600; display: block;">Pending</span>
+                            <strong id="countPending" style="font-size: 1.2rem; color: #78350f;">0</strong>
+                        </div>
+                        <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 0.6rem; border-radius: 6px;">
+                            <span style="font-size: 0.75rem; color: #1e40af; font-weight: 600; display: block;">Accepted</span>
+                            <strong id="countAccepted" style="font-size: 1.2rem; color: #1e3a8a;">0</strong>
+                        </div>
+                        <div style="background: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 0.6rem; border-radius: 6px;">
+                            <span style="font-size: 0.75rem; color: #6b21a8; font-weight: 600; display: block;">Shipped</span>
+                            <strong id="countShipped" style="font-size: 1.2rem; color: #581c87;">0</strong>
+                        </div>
+                        <div style="background: #dcfce7; border-left: 4px solid #22c55e; padding: 0.6rem; border-radius: 6px;">
+                            <span style="font-size: 0.75rem; color: #166534; font-weight: 600; display: block;">Delivered</span>
+                            <strong id="countDelivered" style="font-size: 1.2rem; color: #14532d;">0</strong>
+                        </div>
+                        <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 0.6rem; border-radius: 6px; grid-column: span 2;">
+                            <span style="font-size: 0.75rem; color: #991b1b; font-weight: 600; display: block;">Rejected</span>
+                            <strong id="countRejected" style="font-size: 1.2rem; color: #7f1d1d;">0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Animated Doughnut Chart -->
+                    <div style="height: 200px; position: relative;">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECENT ORDERS TABLE -->
+        <section class="table-card" style="margin-top: 1.5rem; background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <h3 style="margin-top: 0; font-size: 1.1rem; color: #1f2937;">Recent Orders</h3>
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f3f4f6; color: #4b5563;">
+                            <th style="padding: 12px;">Order ID</th>
+                            <th style="padding: 12px;">Customer</th>
+                            <th style="padding: 12px;">Amount</th>
+                            <th style="padding: 12px;">Status</th>
+                            <th style="padding: 12px;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentOrdersBody">
+                        <tr><td colspan="5" style="padding: 12px; text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

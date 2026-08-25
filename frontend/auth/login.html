@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login</title>
+
+    <link
+        rel="stylesheet"
+        href="auth.css"
+    >
+
+</head>
+
+
+<body>
+
+    <div class="auth-container">
+
+        <div class="auth-card">
+
+            <h1>
+                Product Management
+            </h1>
+
+            <p>
+                Login to continue
+            </p>
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="message"
+                class="message"
+            >
+            </div>
+
+
+            <!-- LOGIN FORM -->
+
+            <form id="loginForm">
+
+
+                <!-- USERNAME -->
+
+                <div class="form-group">
+
+                    <label
+                        for="username"
+                    >
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter username"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label
+                        for="password"
+                    >
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter password"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- LOGIN BUTTON -->
+
+                <button
+                    type="submit"
+                    class="login-btn"
+                >
+
+                    Login
+
+                </button>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- SHARED AUTH -->
+     
+<script src="../shared/auth.js"></script>
+
+    <!-- LOGIN JS -->
+
+    <script
+        src="auth.js"
+    ></script>
+
+
+</body>
+
+</html>

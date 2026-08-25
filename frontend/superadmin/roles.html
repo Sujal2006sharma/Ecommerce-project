@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roles & Permissions - SuperAdmin</title>
+    <link rel="stylesheet" href="../admin/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🛡️</span>
+            <span>SuperAdmin Panel</span>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+            <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+            <a href="roles.html" class="sidebar-link active"><span class="sidebar-icon">🛡️</span> Roles</a>
+            <a href="products.html" class="sidebar-link"><span class="sidebar-icon">📦</span> Products</a>
+            <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🗂️</span> Categories</a>
+            <a href="orders.html" class="sidebar-link"><span class="sidebar-icon">🛒</span> Orders</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">ACCESS CONTROL</span>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Roles & System Access</h1>
+            </div>
+        </header>
+
+        <section id="rolesContainer" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            <p>Loading roles...</p>
+        </section>
+    </main>
+</div>
+
+<script src="../shared/auth.js"></script>
+<script src="roles.js"></script>
+</body>
+</html>

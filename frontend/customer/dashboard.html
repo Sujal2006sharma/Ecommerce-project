@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Customer Dashboard
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="customer.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <nav class="customer-navbar">
+
+
+        <!-- LOGO -->
+
+        <div class="customer-logo">
+
+            🛍️ Customer Panel
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <div class="customer-nav-right">
+
+
+            <a
+                href="dashboard.html"
+                class="customer-nav-link active"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="products.html"
+                class="customer-nav-link"
+            >
+                Products
+            </a>
+
+
+            <a
+                href="orders.html"
+                class="customer-nav-link"
+            >
+                My Orders
+            </a>
+
+
+            <!-- USER -->
+
+            <span
+                id="userInfo"
+                class="customer-user"
+            >
+                Loading...
+            </span>
+
+
+            <!-- LOGOUT -->
+
+            <button
+                type="button"
+                class="customer-logout"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MAIN CONTAINER
+         ===================================================== -->
+
+    <main class="customer-container">
+
+
+        <!-- =================================================
+             WELCOME SECTION
+             ================================================= -->
+
+        <section class="customer-welcome">
+
+
+            <div class="welcome-content">
+
+                <div class="welcome-label">
+                    CUSTOMER DASHBOARD
+                </div>
+
+
+                <h1>
+                    Welcome back! 👋
+                </h1>
+
+
+                <p>
+                    Browse products, place orders and track
+                    your purchases from one place.
+                </p>
+
+            </div>
+
+
+            <a
+                href="products.html"
+                class="primary-button"
+            >
+                Browse Products
+                <span>→</span>
+            </a>
+
+        </section>
+
+
+
+        <!-- =================================================
+             STATISTICS
+             ================================================= -->
+
+        <section class="customer-stats">
+
+
+            <!-- PRODUCTS -->
+
+            <div class="customer-stat-card">
+
+                <div class="stat-icon blue">
+                    📦
+                </div>
+
+
+                <div class="stat-content">
+
+                    <h2 id="totalProducts">
+                        0
+                    </h2>
+
+                    <p>
+                        Products
+                    </p>
+
+                    <span>
+                        Available products
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CATEGORIES -->
+
+            <div class="customer-stat-card">
+
+                <div class="stat-icon purple">
+                    🗂️
+                </div>
+
+
+                <div class="stat-content">
+
+                    <h2 id="totalCategories">
+                        0
+                    </h2>
+
+                    <p>
+                        Categories
+                    </p>
+
+                    <span>
+                        Product categories
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STOCK -->
+
+            <div class="customer-stat-card">
+
+                <div class="stat-icon green">
+                    📊
+                </div>
+
+
+                <div class="stat-content">
+
+                    <h2 id="totalStock">
+                        0
+                    </h2>
+
+                    <p>
+                        In Stock
+                    </p>
+
+                    <span>
+                        Items available
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ORDERS -->
+
+            <div class="customer-stat-card">
+
+                <div class="stat-icon orange">
+                    🛒
+                </div>
+
+
+                <div class="stat-content">
+
+                    <h2 id="totalOrders">
+                        0
+                    </h2>
+
+                    <p>
+                        Orders
+                    </p>
+
+                    <span>
+                        My orders
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             QUICK ACTIONS
+             ================================================= -->
+
+        <section class="customer-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Quick Actions
+                    </h2>
+
+                    <p>
+                        Manage your shopping easily.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="quick-action-grid">
+
+
+                <!-- BROWSE PRODUCTS -->
+
+                <a
+                    href="products.html"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon blue">
+                        📦
+                    </div>
+
+
+                    <div class="quick-card-content">
+
+                        <h3>
+                            Browse Products
+                        </h3>
+
+                        <p>
+                            View all available products.
+                        </p>
+
+                    </div>
+
+
+                    <span class="quick-arrow">
+                        →
+                    </span>
+
+                </a>
+
+
+
+                <!-- MY ORDERS -->
+
+                <a
+                    href="orders.html"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon orange">
+                        🛒
+                    </div>
+
+
+                    <div class="quick-card-content">
+
+                        <h3>
+                            My Orders
+                        </h3>
+
+                        <p>
+                            View and track your orders.
+                        </p>
+
+                    </div>
+
+
+                    <span class="quick-arrow">
+                        →
+                    </span>
+
+                </a>
+
+
+
+                <!-- START SHOPPING -->
+
+                <a
+                    href="products.html"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon green">
+                        🛍️
+                    </div>
+
+
+                    <div class="quick-card-content">
+
+                        <h3>
+                            Start Shopping
+                        </h3>
+
+                        <p>
+                            Choose products and start shopping.
+                        </p>
+
+                    </div>
+
+
+                    <span class="quick-arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             AVAILABLE PRODUCTS
+             ================================================= -->
+
+        <section class="customer-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Available Products
+                    </h2>
+
+                    <p>
+                        Some products available in our store.
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="products.html"
+                    class="view-all-button"
+                >
+                    View All
+                    <span>→</span>
+                </a>
+
+            </div>
+
+
+            <!-- PRODUCTS ARE INSERTED BY dashboard.js -->
+
+            <div
+                id="featuredProducts"
+                class="featured-products"
+            >
+
+                <div class="loading-card">
+
+                    <div class="loading-spinner"></div>
+
+                    <span>
+                        Loading products...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         AUTH
+         ===================================================== -->
+
+    <script src="../shared/auth.js"></script>
+
+
+    <!-- =====================================================
+         DASHBOARD JAVASCRIPT
+         ===================================================== -->
+
+    <script src="dashboard.js"></script>
+
+
+</body>
+
+</html>

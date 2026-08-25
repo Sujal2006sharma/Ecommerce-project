@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Customer Products
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="customer.css"
+    >
+
+    <style>
+
+        .products-page {
+            max-width: 1250px;
+            margin: 0 auto;
+            padding: 40px 30px 70px;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .products-header h1 {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .products-header p {
+            color: #64748b;
+        }
+
+        .products-table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 4px 18px rgba(15, 23, 42, 0.07);
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .products-table th {
+            background: #f1f5f9;
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .products-table td {
+            padding: 15px 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .product-table-image {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .no-table-image {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+        }
+
+        .buy-button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .buy-button:hover {
+            background: #1d4ed8;
+        }
+
+        .buy-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .stock-available {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .stock-empty {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        @media (max-width: 800px) {
+
+            .products-table-container {
+                overflow-x: auto;
+            }
+
+            .products-table {
+                min-width: 850px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <nav class="customer-navbar">
+
+        <div class="customer-logo">
+            Customer Panel
+        </div>
+
+
+        <div class="customer-nav-right">
+
+            <a
+                href="dashboard.html"
+                class="customer-nav-link"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="products.html"
+                class="customer-nav-link active"
+            >
+                Products
+            </a>
+
+
+            <a
+                href="orders.html"
+                class="customer-nav-link"
+            >
+                My Orders
+            </a>
+
+
+            <span
+                id="userInfo"
+                class="customer-user"
+            >
+                Loading...
+            </span>
+
+
+            <button
+                type="button"
+                class="customer-logout"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         PRODUCTS
+         ===================================================== -->
+
+    <main class="products-page">
+
+
+        <div class="products-header">
+
+            <div>
+
+                <h1>
+                    Products
+                </h1>
+
+                <p>
+                    Browse all available products.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div
+            id="message"
+            style="
+                margin-bottom: 20px;
+                color: #16a34a;
+                font-weight: 600;
+            "
+        ></div>
+
+
+
+        <div class="products-table-container">
+
+            <table class="products-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            IMAGE
+                        </th>
+
+                        <th>
+                            NAME
+                        </th>
+
+                        <th>
+                            CATEGORY
+                        </th>
+
+                        <th>
+                            PRICE
+                        </th>
+
+                        <th>
+                            QUANTITY
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="productsTableBody">
+
+                    <tr>
+
+                        <td colspan="7">
+                            Loading products...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         AUTH
+         ===================================================== -->
+
+    <script src="../shared/auth.js"></script>
+
+
+    <!-- =====================================================
+         PRODUCTS JS
+         ===================================================== -->
+
+    <script src="products.js"></script>
+
+
+</body>
+
+</html>

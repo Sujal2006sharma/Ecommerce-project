@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Categories</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =================================================
+         NAVBAR
+         ================================================= -->
+
+    <nav class="navbar">
+
+        <div class="navbar-brand">
+            Product Management
+        </div>
+
+        <div class="navbar-right">
+            Admin
+        </div>
+
+    </nav>
+
+
+
+    <!-- =================================================
+         MAIN APPLICATION LAYOUT
+         ================================================= -->
+
+    <div class="app-layout">
+
+
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
+
+        <aside class="sidebar">
+
+
+            <div class="sidebar-title">
+                MENU
+            </div>
+
+
+            <!-- Products -->
+
+            <button
+                class="sidebar-item"
+                onclick="window.location.href='index.html'"
+            >
+                📦 Products
+            </button>
+
+
+            <!-- Categories -->
+
+            <button
+                class="sidebar-item active"
+                onclick="window.location.href='categories.html'"
+            >
+                🗂 Categories
+            </button>
+
+
+        </aside>
+
+
+
+        <!-- =================================================
+             MAIN CONTENT
+             ================================================= -->
+
+        <main class="main-content">
+
+
+            <div class="container">
+
+
+                <!-- =================================================
+                     HEADER
+                     ================================================= -->
+
+                <div class="header">
+
+
+                    <div>
+
+                        <h1>
+                            Categories
+                        </h1>
+
+                        <p>
+                            Manage your categories
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- ONLY ADD CATEGORY BUTTON -->
+
+                    <div class="header-buttons">
+
+                        <button
+                            class="add-btn"
+                            onclick="openCategoryForm()"
+                        >
+                            + Add Category
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     CATEGORY FORM
+                     ================================================= -->
+
+                <div
+                    id="categoryForm"
+                    class="category-form"
+                >
+
+
+                    <div class="category-form-header">
+
+                        <h2 id="formTitle">
+                            Add Category
+                        </h2>
+
+                    </div>
+
+
+
+                    <!-- Hidden Category ID -->
+
+                    <input
+                        type="hidden"
+                        id="categoryId"
+                    >
+
+
+
+                    <!-- Category Name -->
+
+                    <div class="form-group">
+
+                        <label for="categoryName">
+                            Category Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="categoryName"
+                            placeholder="Enter category name"
+                        >
+
+                    </div>
+
+
+
+                    <!-- Category Description -->
+
+                    <div class="form-group">
+
+                        <label for="categoryDescription">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="categoryDescription"
+                            placeholder="Enter category description"
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+
+
+                    <!-- Form Buttons -->
+
+                    <div class="modal-buttons">
+
+
+                        <button
+                            class="cancel-btn"
+                            onclick="closeCategoryForm()"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            class="save-btn"
+                            onclick="saveCategory()"
+                        >
+                            Save Category
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     CATEGORY TABLE
+                     ================================================= -->
+
+                <div class="table-card">
+
+
+                    <table>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ID
+                                </th>
+
+                                <th>
+                                    NAME
+                                </th>
+
+                                <th>
+                                    DESCRIPTION
+                                </th>
+
+                                <th>
+                                    ACTIONS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+
+                        <tbody id="categoryTableBody">
+
+                            <!-- Categories inserted by JavaScript -->
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+
+                    <!-- Empty Message -->
+
+                    <div
+                        id="emptyCategoryMessage"
+                        class="empty-message"
+                    >
+                        No categories found.
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </main>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         JAVASCRIPT
+         ================================================= -->
+
+    <script src="categories.js"></script>
+
+
+</body>
+
+</html>
