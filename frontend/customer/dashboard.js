@@ -66,6 +66,26 @@ function filterByCategory(catId, btnEl) {
 // =====================================================
 // RENDER DYNAMIC PRODUCTS FROM DATABASE
 // =====================================================
+// Map local image paths based on product names
+function getProductImageFallback(productName) {
+    const nameLower = (productName || "").toLowerCase();
+    
+    // Uses paths relative to frontend/customer/
+    if (nameLower.includes("laptop")) {
+        return "../images/laptop-1.jpg";
+    }
+    if (nameLower.includes("shirt") || nameLower.includes("t-shirt") || nameLower.includes("t-shirts")) {
+        return "../images/T-Shirt-1.jpg";
+    }
+    if (nameLower.includes("burger")) {
+        return "../images/Burger.jpg";
+    }
+    return "";
+}
+
+// =====================================================
+// RENDER PRODUCT CATALOG GRID
+// =====================================================
 
 function renderProductGrid(products) {
     const grid = document.getElementById("productGrid");
@@ -77,8 +97,13 @@ function renderProductGrid(products) {
     }
 
     grid.innerHTML = products.map(p => {
-        // Read dynamic image URL saved in backend database
-        const imageUrl = p.image_url ? p.image_url.trim() : "";
+        // 1. Use seller uploaded image_url if present in DB
+        // 2. Otherwise fall back to local project image matching the product name
+        let imageUrl = p.image_url ? p.image_url.trim() : "";
+        if (!imageUrl) {
+            imageUrl = getProductImageFallback(p.name);
+        }
+
         const categoryName = p.category ? (p.category.name || p.category) : "General";
         const inStock = Number(p.quantity) > 0;
 
@@ -90,9 +115,9 @@ function renderProductGrid(products) {
                              src="${imageUrl}" 
                              class="product-image" 
                              alt="${escapeHtml(p.name)}" 
-                             onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;\'>No Image Available</div>';">
+                             onerror="this.onerror=null; this.src='../images/Burger.jpg';">
                     ` : `
-                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;">No Image Available</div>
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;">No Image</div>
                     `}
                     <span class="stock-tag ${inStock ? 'in-stock' : 'out-stock'}">
                         ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
