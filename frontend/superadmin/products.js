@@ -137,6 +137,8 @@ document.addEventListener(
 
 async function loadProducts() {
 
+    if (!productTableBody) return;
+
     productTableBody.innerHTML = `
         <tr>
             <td colspan="7" class="loading-cell">
@@ -178,14 +180,6 @@ async function loadProducts() {
 
         const result =
             await response.json();
-
-
-        // Backend returns:
-        //
-        // {
-        //     "message": "...",
-        //     "data": [...]
-        // }
 
         products =
             Array.isArray(result)
@@ -234,6 +228,7 @@ async function loadProducts() {
 
 function renderProducts() {
 
+    if (!productTableBody) return;
     productTableBody.innerHTML = "";
 
 
@@ -258,35 +253,14 @@ function renderProducts() {
                 document.createElement("tr");
 
 
-            // -----------------------------------------
-            // PRODUCT NAME
-            // -----------------------------------------
-
             const safeProductName =
                 escapeHtml(product.name || "");
 
-
-            // -----------------------------------------
-            // CATEGORY
-            // -----------------------------------------
 
             const categoryName =
                 product.category_name ||
                 "No Category";
 
-
-            // -----------------------------------------
-            // STATUS
-            // -----------------------------------------
-
-            const currentStatus =
-                product.status ||
-                "No Status";
-
-
-            // -----------------------------------------
-            // CREATE ROW
-            // -----------------------------------------
 
             row.innerHTML = `
                 <td>
@@ -302,11 +276,11 @@ function renderProducts() {
                 </td>
 
                 <td>
-                    $${Number(product.price).toFixed(2)}
+                    $${Number(product.price || 0).toFixed(2)}
                 </td>
 
                 <td>
-                    ${product.quantity}
+                    ${product.quantity ?? 0}
                 </td>
 
                 <td>
@@ -350,10 +324,6 @@ function renderProducts() {
                 </td>
             `;
 
-
-            // -----------------------------------------
-            // STATUS CHANGE EVENT
-            // -----------------------------------------
 
             const statusSelect =
                 row.querySelector(
@@ -526,6 +496,8 @@ async function loadCategories() {
 
 function populateCategories() {
 
+    if (!productCategory) return;
+
     productCategory.innerHTML = `
         <option value="">
             Select Category
@@ -632,40 +604,37 @@ async function loadStatuses() {
 // ADD PRODUCT BUTTON
 // =====================================================
 
-addProductButton.addEventListener(
-    "click",
-    function () {
+if (addProductButton) {
 
-        // Reset form
-        productForm.reset();
+    addProductButton.addEventListener(
+        "click",
+        function () {
 
+            if (productForm) productForm.reset();
 
-        // Clear product ID
-        productId.value = "";
+            if (productId) productId.value = "";
 
+            if (modalTitle) {
+                modalTitle.textContent = "Add Product";
+            }
 
-        // Modal title
-        modalTitle.textContent =
-            "Add Product";
+            if (saveProductButton) {
+                saveProductButton.textContent = "Create Product";
+            }
 
+            if (productModal) {
+                productModal.style.display = "flex";
+            }
 
-        // Button text
-        saveProductButton.textContent =
-            "Create Product";
+        }
+    );
 
-
-        // Open modal
-        productModal.style.display =
-            "flex";
-
-    }
-);
+}
 
 
 // =====================================================
 // OPEN EDIT PRODUCT
 // =====================================================
-
 
 function openEditProduct(id) {
 
@@ -691,313 +660,283 @@ function openEditProduct(id) {
     }
 
 
-    // =========================================
-    // PRODUCT ID
-    // =========================================
+    if (productId) productId.value = product.id;
 
-    productId.value =
-        product.id;
+    if (productName) productName.value = product.name || "";
 
+    if (productPrice) productPrice.value = product.price ?? "";
 
-    // =========================================
-    // PRODUCT NAME
-    // =========================================
+    if (productQuantity) productQuantity.value = product.quantity ?? "";
 
-    productName.value =
-        product.name || "";
+    if (productCategory) productCategory.value = product.category_id ?? "";
 
+    if (modalTitle) modalTitle.textContent = "Edit Product";
 
-    // =========================================
-    // PRICE
-    // =========================================
+    if (saveProductButton) saveProductButton.textContent = "Update Product";
 
-    productPrice.value =
-        product.price ?? "";
-
-
-    // =========================================
-    // QUANTITY
-    // =========================================
-
-    productQuantity.value =
-        product.quantity ?? "";
-
-
-    // =========================================
-    // CATEGORY
-    // =========================================
-
-    productCategory.value =
-        product.category_id ?? "";
-
-
-    // =========================================
-    // MODAL TITLE
-    // =========================================
-
-    modalTitle.textContent =
-        "Edit Product";
-
-
-    // =========================================
-    // BUTTON TEXT
-    // =========================================
-
-    saveProductButton.textContent =
-        "Update Product";
-
-
-    // =========================================
-    // OPEN MODAL
-    // =========================================
-
-    productModal.style.display =
-        "flex";
+    if (productModal) productModal.style.display = "flex";
 
 }
 
+
 // =====================================================
-// SAVE PRODUCT
-//
-// CREATE OR UPDATE
+// SAVE PRODUCT (WITH ENFORCED VALIDATION RULES)
 // =====================================================
 
-productForm.addEventListener(
-    "submit",
-    async function (event) {
+if (productForm) {
 
-        event.preventDefault();
+    productForm.addEventListener(
+        "submit",
+        async function (event) {
 
-
-        // -----------------------------------------
-        // Get product ID
-        // -----------------------------------------
-
-        const id =
-            productId.value.trim();
+            event.preventDefault();
 
 
-        // -----------------------------------------
-        // Get form values
-        // -----------------------------------------
-
-        const name =
-            productName.value.trim();
+            const id =
+                productId.value.trim();
 
 
-        const price =
-            Number(productPrice.value);
+            const name =
+                productName.value.trim();
 
 
-        const quantity =
-            Number(productQuantity.value);
+            const priceInput =
+                productPrice.value.trim();
 
 
-        const categoryId =
-            Number(productCategory.value);
+            const quantityInput =
+                productQuantity.value.trim();
 
 
-        // -----------------------------------------
-        // Validation
-        // -----------------------------------------
-
-        if (!name) {
-
-            showMessage(
-                "Please enter product name.",
-                "error"
-            );
-
-            return;
-        }
+            const price =
+                parseFloat(priceInput);
 
 
-        if (
-            productPrice.value === "" ||
-            Number.isNaN(price) ||
-            price < 0
-        ) {
-
-            showMessage(
-                "Please enter a valid price.",
-                "error"
-            );
-
-            return;
-        }
+            const quantity =
+                Number(quantityInput);
 
 
-        if (
-            productQuantity.value === "" ||
-            Number.isNaN(quantity) ||
-            quantity < 0
-        ) {
-
-            showMessage(
-                "Please enter a valid quantity.",
-                "error"
-            );
-
-            return;
-        }
+            const categoryId =
+                Number(productCategory.value);
 
 
-        if (!categoryId) {
+            // -----------------------------------------
+            // 1. Product Name Validation (No numbers only)
+            // -----------------------------------------
 
-            showMessage(
-                "Please select a category.",
-                "error"
-            );
+            const numericOnlyPattern = /^\d+$/;
 
-            return;
-        }
+            if (!name) {
 
+                showMessage(
+                    "Please enter product name.",
+                    "error"
+                );
 
-        // -----------------------------------------
-        // Product data
-        // -----------------------------------------
-const productData = {
-
-    name: name,
-
-    price: price,
-
-    quantity: quantity,
-
-    category_id: categoryId
-
-};
-
-
-        console.log(
-            "PRODUCT DATA:",
-            productData
-        );
-
-
-        try {
-
-            let response;
-
-
-            // =========================================
-            // UPDATE PRODUCT
-            // =========================================
-
-            if (id) {
-
-                response =
-                    await authFetch(
-                        `${ADMIN_API_URL}/products/${id}`,
-                        {
-                            method: "PUT",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    productData
-                                )
-                        }
-                    );
-
+                return;
             }
 
 
-            // =========================================
-            // CREATE PRODUCT
-            // =========================================
+            if (numericOnlyPattern.test(name)) {
 
-            else {
+                showMessage(
+                    "Product name cannot contain numbers only.",
+                    "error"
+                );
 
-                response =
-                    await authFetch(
-                        `${ADMIN_API_URL}/products`,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    productData
-                                )
-                        }
-                    );
-
-            }
-
-
-            if (!response) {
                 return;
             }
 
 
             // -----------------------------------------
-            // Error
+            // 2. Price Validation (Must be > 0)
             // -----------------------------------------
 
-            if (!response.ok) {
+            if (
+                priceInput === "" ||
+                Number.isNaN(price) ||
+                price <= 0
+            ) {
 
-                const errorData =
-                    await response.json()
-                    .catch(function () {
-                        return {};
-                    });
-
-
-                throw new Error(
-                    errorData.detail ||
-                    "Failed to save product."
+                showMessage(
+                    "Price must be strictly greater than 0.",
+                    "error"
                 );
 
+                return;
             }
 
 
             // -----------------------------------------
-            // Success
+            // 3. Quantity Validation (Positive Integer > 0, No Floats)
             // -----------------------------------------
 
-            showMessage(
-                id
-                    ? "Product updated successfully."
-                    : "Product created successfully.",
-                "success"
-            );
+            if (
+                quantityInput === "" ||
+                Number.isNaN(quantity) ||
+                quantity <= 0
+            ) {
+
+                showMessage(
+                    "Quantity must be strictly greater than 0.",
+                    "error"
+                );
+
+                return;
+            }
 
 
-            // Close modal
-            closeProductModal();
+            if (
+                !Number.isInteger(quantity) ||
+                quantityInput.includes(".")
+            ) {
+
+                showMessage(
+                    "Quantity must be a whole integer (decimals not allowed).",
+                    "error"
+                );
+
+                return;
+            }
 
 
-            // Reload products
-            await loadProducts();
+            // -----------------------------------------
+            // 4. Category Validation
+            // -----------------------------------------
+
+            if (!categoryId) {
+
+                showMessage(
+                    "Please select a category.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            // -----------------------------------------
+            // Payload Data
+            // -----------------------------------------
+
+            const productData = {
+
+                name: name,
+
+                price: price,
+
+                quantity: parseInt(quantityInput, 10),
+
+                category_id: categoryId
+
+            };
+
+
+            try {
+
+                let response;
+
+
+                if (id) {
+
+                    response =
+                        await authFetch(
+                            `${ADMIN_API_URL}/products/${id}`,
+                            {
+                                method: "PUT",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        productData
+                                    )
+                            }
+                        );
+
+                }
+                else {
+
+                    response =
+                        await authFetch(
+                            `${ADMIN_API_URL}/products`,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        productData
+                                    )
+                            }
+                        );
+
+                }
+
+
+                if (!response) {
+                    return;
+                }
+
+
+                if (!response.ok) {
+
+                    const errorData =
+                        await response.json()
+                        .catch(function () {
+                            return {};
+                        });
+
+
+                    throw new Error(
+                        errorData.detail ||
+                        "Failed to save product."
+                    );
+
+                }
+
+
+                showMessage(
+                    id
+                        ? "Product updated successfully."
+                        : "Product created successfully.",
+                    "success"
+                );
+
+
+                closeProductModal();
+
+
+                await loadProducts();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "SAVE PRODUCT ERROR:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Failed to save product.",
+                    "error"
+                );
+
+            }
 
         }
-        catch (error) {
+    );
 
-            console.error(
-                "SAVE PRODUCT ERROR:",
-                error
-            );
-
-
-            showMessage(
-                error.message ||
-                "Failed to save product.",
-                "error"
-            );
-
-        }
-
-    }
-);
+}
 
 
 // =====================================================
@@ -1022,10 +961,6 @@ async function updateProductStatus(
 
 
     try {
-
-        // Backend endpoint:
-        //
-        // PUT /products/{product_id}/status?status_id={status_id}
 
         const response =
             await authFetch(
@@ -1058,23 +993,12 @@ async function updateProductStatus(
         }
 
 
-        const result =
-            await response.json();
-
-
-        console.log(
-            "STATUS UPDATE RESPONSE:",
-            result
-        );
-
-
         showMessage(
             "Product status updated successfully.",
             "success"
         );
 
 
-        // Update local product data
         const product =
             products.find(
                 function (item) {
@@ -1121,7 +1045,6 @@ async function updateProductStatus(
         );
 
 
-        // Restore previous status
         if (oldStatusId) {
 
             statusSelect.value =
@@ -1226,31 +1149,41 @@ async function deleteProduct(
 // CLOSE MODAL
 // =====================================================
 
-closeProductModalButton.addEventListener(
-    "click",
-    closeProductModal
-);
+if (closeProductModalButton) {
+
+    closeProductModalButton.addEventListener(
+        "click",
+        closeProductModal
+    );
+
+}
 
 
 function closeProductModal() {
 
-    productModal.style.display =
-        "none";
+    if (productModal) {
+        productModal.style.display = "none";
+    }
 
 
-    productForm.reset();
+    if (productForm) {
+        productForm.reset();
+    }
 
 
-    productId.value =
-        "";
+    if (productId) {
+        productId.value = "";
+    }
 
 
-    modalTitle.textContent =
-        "Add Product";
+    if (modalTitle) {
+        modalTitle.textContent = "Add Product";
+    }
 
 
-    saveProductButton.textContent =
-        "Create Product";
+    if (saveProductButton) {
+        saveProductButton.textContent = "Create Product";
+    }
 
 }
 
