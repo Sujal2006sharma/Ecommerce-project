@@ -158,7 +158,7 @@ function addToCart(productId) {
             qty: 1
         });
     }
-
+    
     updateCartUI();
 }
 
