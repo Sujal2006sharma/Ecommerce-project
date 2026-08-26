@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 });
 
-// Load products and categories from FastAPI
 async function loadStoreData() {
     try {
         const [pRes, cRes] = await Promise.all([
@@ -40,7 +39,6 @@ async function loadStoreData() {
     }
 }
 
-// Render Category Filter Pills
 function renderCategoryPills() {
     const container = document.getElementById("categoryPills");
     if (!container) return;
@@ -53,7 +51,6 @@ function renderCategoryPills() {
     container.innerHTML = html;
 }
 
-// Filter Products by Category
 function filterByCategory(catId, btnEl) {
     document.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
     btnEl.classList.add("active");
@@ -66,35 +63,48 @@ function filterByCategory(catId, btnEl) {
     }
 }
 
-// Render Product Cards Grid
+// =====================================================
+// RENDER DYNAMIC PRODUCTS FROM DATABASE
+// =====================================================
+
 function renderProductGrid(products) {
     const grid = document.getElementById("productGrid");
     if (!grid) return;
 
-    if (products.length === 0) {
-        grid.innerHTML = `<div style="grid-column: span 3; text-align: center; padding: 3rem; color: #6b7280;">No products available in this category.</div>`;
+    if (!products || products.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #64748b;">No products available.</div>`;
         return;
     }
 
     grid.innerHTML = products.map(p => {
-        // Fallback image if image_url is missing
-        const imgUrl = p.image_url ? p.image_url : `../images/default-product.png`;
+        // Read dynamic image URL saved in backend database
+        const imageUrl = p.image_url ? p.image_url.trim() : "";
         const categoryName = p.category ? (p.category.name || p.category) : "General";
         const inStock = Number(p.quantity) > 0;
 
         return `
             <div class="product-card">
-                <img src="${imgUrl}" class="product-image" alt="${escapeHtml(p.name)}" onerror="this.src='https://via.placeholder.com/250x180?text=Product'">
+                <div class="product-image-container">
+                    ${imageUrl ? `
+                        <img id="main-img-${p.id}" 
+                             src="${imageUrl}" 
+                             class="product-image" 
+                             alt="${escapeHtml(p.name)}" 
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;\'>No Image Available</div>';">
+                    ` : `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;">No Image Available</div>
+                    `}
+                    <span class="stock-tag ${inStock ? 'in-stock' : 'out-stock'}">
+                        ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
+                    </span>
+                </div>
                 <div class="product-info">
                     <span class="product-category">${escapeHtml(categoryName)}</span>
                     <h3 class="product-title">${escapeHtml(p.name)}</h3>
-                    <div style="font-size: 0.85rem; color: ${inStock ? '#16a34a' : '#dc2626'}; font-weight: 600; margin-bottom: 0.5rem;">
-                        ${inStock ? `In Stock (${p.quantity})` : 'Out of Stock'}
-                    </div>
                     <div class="product-bottom">
                         <span class="product-price">₹${Number(p.price).toLocaleString("en-IN")}</span>
                         <button class="add-cart-btn" ${!inStock ? 'disabled' : ''} onclick="addToCart(${p.id})">
-                            ${inStock ? '+ Add to Cart' : 'Sold Out'}
+                            ${inStock ? '+ Add to Cart' : 'Out of Stock'}
                         </button>
                     </div>
                 </div>
@@ -103,7 +113,6 @@ function renderProductGrid(products) {
     }).join("");
 }
 
-// Shopping Cart Functions
 function addToCart(productId) {
     const product = allProducts.find(p => Number(p.id) === Number(productId));
     if (!product) return;
@@ -113,7 +122,7 @@ function addToCart(productId) {
         if (existing.qty < product.quantity) {
             existing.qty++;
         } else {
-            alert("Cannot add more than available stock limit!");
+            alert("Maximum available stock limit reached!");
             return;
         }
     } else {
@@ -147,19 +156,19 @@ function updateCartUI() {
     if (!cartItems) return;
 
     if (shoppingCart.length === 0) {
-        cartItems.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 2rem;">Your cart is empty.</p>`;
+        cartItems.innerHTML = `<p style="text-align: center; color: #64748b; margin-top: 3rem; font-size: 0.95rem;">Your cart is empty.</p>`;
         return;
     }
 
     cartItems.innerHTML = shoppingCart.map(item => `
         <div class="cart-item">
             <div>
-                <strong style="color: #1f2937; display: block;">${escapeHtml(item.name)}</strong>
-                <span style="color: #6b7280; font-size: 0.85rem;">₹${item.price} x ${item.qty}</span>
+                <strong style="color: #0f172a; display: block; font-size: 0.95rem;">${escapeHtml(item.name)}</strong>
+                <span style="color: #64748b; font-size: 0.85rem;">₹${item.price} × ${item.qty}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-weight: 700; color: #1f2937;">₹${(item.price * item.qty).toLocaleString("en-IN")}</span>
-                <button onclick="removeFromCart(${item.id})" style="background: #fee2e2; color: #dc2626; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">&times;</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 700; color: #0f172a;">₹${(item.price * item.qty).toLocaleString("en-IN")}</span>
+                <button onclick="removeFromCart(${item.id})" style="background: #fee2e2; color: #dc2626; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: bold;">&times;</button>
             </div>
         </div>
     `).join("");
@@ -174,7 +183,6 @@ function toggleCart() {
     }
 }
 
-// Checkout & Submit Order to Backend API
 async function checkoutOrder() {
     if (shoppingCart.length === 0) {
         alert("Your cart is empty!");
@@ -200,7 +208,7 @@ async function checkoutOrder() {
             shoppingCart = [];
             updateCartUI();
             toggleCart();
-            await loadStoreData(); // Refresh product quantities
+            await loadStoreData();
         } else {
             const err = await response.json().catch(() => ({}));
             alert(err.detail || "Failed to place order.");
