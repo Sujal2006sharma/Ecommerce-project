@@ -13,11 +13,24 @@ document.addEventListener("DOMContentLoaded", async function () {
         const user = await protectPage(["CUSTOMER", "ADMIN", "SUPERADMIN"]);
         if (!user) return;
 
+        displayUserProfile(user);
         await loadStoreData();
     } catch (error) {
         console.error("CUSTOMER DASHBOARD ERROR:", error);
     }
 });
+
+function displayUserProfile(user) {
+    const nameEl = document.getElementById("navUserName");
+    const roleEl = document.getElementById("navUserRole");
+    const avatarEl = document.getElementById("profileAvatar");
+
+    const userName = user.full_name || user.username || user.email || "Customer";
+
+    if (nameEl) nameEl.textContent = userName;
+    if (roleEl) roleEl.textContent = user.role ? (user.role.name || user.role) : "Customer";
+    if (avatarEl) avatarEl.textContent = userName.charAt(0).toUpperCase();
+}
 
 async function loadStoreData() {
     try {
@@ -63,29 +76,57 @@ function filterByCategory(catId, btnEl) {
     }
 }
 
-// =====================================================
-// RENDER DYNAMIC PRODUCTS FROM DATABASE
-// =====================================================
-// Map local image paths based on product names
-function getProductImageFallback(productName) {
-    const nameLower = (productName || "").toLowerCase();
-    
-    // Uses paths relative to frontend/customer/
+// MULTI-IMAGE DISK RESOLVER
+function getProductImagesList(product) {
+    const images = [];
+
+    if (product.image_url && product.image_url.trim() !== "") {
+        images.push(product.image_url.trim());
+    }
+
+    const nameLower = (product.name || "").toLowerCase();
+
     if (nameLower.includes("laptop")) {
-        return "../images/laptop-1.jpg";
+        images.push(
+            "/frontend/images/laptop-1.jpg",
+            "/frontend/images/laptop-2.jpg",
+            "/frontend/images/laptop-3.jpg",
+            "/frontend/images/laptop-4.jpg",
+            "/frontend/images/laptop-5.jpg"
+        );
+    } else if (nameLower.includes("shirt") || nameLower.includes("t-shirt") || nameLower.includes("t-shirts")) {
+        images.push(
+            "/frontend/images/T-Shirt-1.jpg",
+            "/frontend/images/T-Shirt-3.jpg",
+            "/frontend/images/T-Shirt-4.jpg"
+        );
+    } else if (nameLower.includes("burger")) {
+        images.push(
+            "/frontend/images/Burger.jpg"
+        );
     }
-    if (nameLower.includes("shirt") || nameLower.includes("t-shirt") || nameLower.includes("t-shirts")) {
-        return "../images/T-Shirt-1.jpg";
-    }
-    if (nameLower.includes("burger")) {
-        return "../images/Burger.jpg";
-    }
-    return "";
+
+    return [...new Set(images)];
 }
 
-// =====================================================
-// RENDER PRODUCT CATALOG GRID
-// =====================================================
+function switchProductImage(productId, newSrc, thumbEl) {
+    const mainImg = document.getElementById(`main-img-${productId}`);
+    if (mainImg) {
+        mainImg.src = newSrc;
+    }
+
+    const card = thumbEl.closest('.product-card');
+    if (card) {
+        card.querySelectorAll('.thumbnail-img').forEach(t => t.classList.remove('active'));
+        thumbEl.classList.add('active');
+    }
+}
+
+function handleImageError(imgEl, fallbackPath) {
+    if (imgEl.getAttribute("data-tried-fallback")) return;
+    imgEl.setAttribute("data-tried-fallback", "true");
+    imgEl.src = fallbackPath;
+}
 
 function renderProductGrid(products) {
     const grid = document.getElementById("productGrid");
@@ -97,25 +138,36 @@ function renderProductGrid(products) {
     }
 
     grid.innerHTML = products.map(p => {
-        // 1. Use seller uploaded image_url if present in DB
-        // 2. Otherwise fall back to local project image matching the product name
-        let imageUrl = p.image_url ? p.image_url.trim() : "";
-        if (!imageUrl) {
-            imageUrl = getProductImageFallback(p.name);
-        }
-
+        const imagesList = getProductImagesList(p);
+        const mainImgUrl = imagesList.length > 0 ? imagesList[0] : "";
         const categoryName = p.category ? (p.category.name || p.category) : "General";
         const inStock = Number(p.quantity) > 0;
+
+        const thumbnailsHtml = imagesList.length > 1 ? `
+            <div class="product-thumbnails">
+                ${imagesList.map((img, idx) => {
+                    const relativeFallback = img.startsWith('/frontend/') ? img.replace('/frontend/', '../') : img;
+                    return `
+                        <img src="${img}" 
+                             class="thumbnail-img ${idx === 0 ? 'active' : ''}" 
+                             onclick="switchProductImage(${p.id}, '${img}', this)"
+                             onerror="handleImageError(this, '${relativeFallback}')">
+                    `;
+                }).join('')}
+            </div>
+        ` : '';
+
+        const mainRelativeFallback = mainImgUrl.startsWith('/frontend/') ? mainImgUrl.replace('/frontend/', '../') : mainImgUrl;
 
         return `
             <div class="product-card">
                 <div class="product-image-container">
-                    ${imageUrl ? `
+                    ${mainImgUrl ? `
                         <img id="main-img-${p.id}" 
-                             src="${imageUrl}" 
+                             src="${mainImgUrl}" 
                              class="product-image" 
-                             alt="${escapeHtml(p.name)}" 
-                             onerror="this.onerror=null; this.src='../images/Burger.jpg';">
+                             alt="${escapeHtml(p.name)}"
+                             onerror="handleImageError(this, '${mainRelativeFallback}')">
                     ` : `
                         <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;">No Image</div>
                     `}
@@ -123,6 +175,7 @@ function renderProductGrid(products) {
                         ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
                     </span>
                 </div>
+                ${thumbnailsHtml}
                 <div class="product-info">
                     <span class="product-category">${escapeHtml(categoryName)}</span>
                     <h3 class="product-title">${escapeHtml(p.name)}</h3>
@@ -158,7 +211,7 @@ function addToCart(productId) {
             qty: 1
         });
     }
-    
+
     updateCartUI();
 }
 
@@ -214,7 +267,14 @@ async function checkoutOrder() {
         return;
     }
 
+    const shippingAddress = prompt("Enter your complete delivery address:");
+    if (!shippingAddress || shippingAddress.trim() === "") {
+        alert("Delivery address is required to complete your order.");
+        return;
+    }
+
     const orderPayload = {
+        shipping_address: shippingAddress.trim(),
         items: shoppingCart.map(item => ({
             product_id: item.id,
             quantity: item.qty

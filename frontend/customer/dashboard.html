@@ -289,9 +289,21 @@
                 <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">CUSTOMER PORTAL</span>
                 <h1 style="margin: 0; font-size: 1.6rem; color: #0f172a;">Explore Products</h1>
             </div>
-            <button onclick="toggleCart()" style="background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; border: none; padding: 0.75rem 1.4rem; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                🛒 Cart (<span id="cartCount">0</span>)
-            </button>
+            
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <!-- NAVBAR USER PROFILE -->
+                <div class="user-profile-menu" style="display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 6px 14px; border-radius: 30px; border: 1px solid #e2e8f0;">
+                    <div class="profile-avatar" id="profileAvatar" style="width: 34px; height: 34px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">U</div>
+                    <div class="profile-info" style="display: flex; flex-direction: column;">
+                        <span id="navUserName" style="font-weight: 700; font-size: 0.85rem; color: #0f172a;">Loading...</span>
+                        <span id="navUserRole" style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Customer</span>
+                    </div>
+                </div>
+
+                <button onclick="toggleCart()" style="background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; border: none; padding: 0.75rem 1.4rem; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                    🛒 Cart (<span id="cartCount">0</span>)
+                </button>
+            </div>
         </header>
 
         <!-- CATEGORY PILLS -->
