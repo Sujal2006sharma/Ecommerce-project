@@ -6,99 +6,79 @@ if (typeof API_URL === "undefined") {
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
-        const user = await protectPage(["CUSTOMER", "ADMIN", "SUPERADMIN"]);
+        const user = await protectPage(["SUPERADMIN", "superadmin"]);
         if (!user) return;
 
-        displayUserProfile(user);
-        await loadMyOrders(user);
+        await loadSuperadminOrders();
     } catch (err) {
-        console.error("ORDERS PAGE INITIALIZATION ERROR:", err);
+        console.error("SUPERADMIN ORDERS LOAD ERROR:", err);
     }
 });
 
-function displayUserProfile(user) {
-    const nameEl = document.getElementById("navUserName");
-    const roleEl = document.getElementById("navUserRole");
-    const avatarEl = document.getElementById("profileAvatar");
-
-    const userName = user.full_name || user.username || user.email || "Customer";
-
-    if (nameEl) nameEl.textContent = userName;
-    if (roleEl) roleEl.textContent = user.role ? (user.role.name || user.role) : "Customer";
-    if (avatarEl) avatarEl.textContent = userName.charAt(0).toUpperCase();
-}
-
-async function loadMyOrders(currentUser) {
-    const container = document.getElementById("ordersContainer");
-    if (!container) return;
+async function loadSuperadminOrders() {
+    const tbody = document.getElementById("ordersTableBody") || document.getElementById("ordersList") || document.querySelector("tbody");
+    if (!tbody) return;
 
     try {
-        const response = await authFetch(`${API_URL}/orders`);
+        let response = await authFetch(`${API_URL}/orders/admin/all`).catch(() => null);
         if (!response || !response.ok) {
-            container.innerHTML = `<p style="text-align: center; color: #64748b;">Failed to fetch orders.</p>`;
+            response = await authFetch(`${API_URL}/orders`).catch(() => null);
+        }
+
+        if (!response || !response.ok) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load order history.</td></tr>`;
             return;
         }
 
         const orders = await response.json();
         const orderList = Array.isArray(orders) ? orders : (orders.data || []);
 
-        if (!orderList || orderList.length === 0) {
-            container.innerHTML = `<p style="text-align: center; color: #64748b; padding: 3rem; font-weight: 600;">No orders placed yet.</p>`;
+        if (orderList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 2rem;">No orders found.</td></tr>`;
             return;
         }
 
-        container.innerHTML = orderList.map(order => {
-            const customerName = order.user ? (order.user.full_name || order.user.username || order.user.email) : (currentUser.full_name || currentUser.username || currentUser.email || "Customer");
-            const customerEmail = order.user ? order.user.email : currentUser.email;
-            const address = order.shipping_address || "Standard Delivery Address";
-            const orderDate = order.created_at ? new Date(order.created_at).toLocaleString("en-IN") : "Recently";
-            const totalAmount = Number(order.total_price || order.total || 0).toLocaleString("en-IN");
+        let savedProfile = {};
+        try {
+            savedProfile = JSON.parse(localStorage.getItem("customer_profile_details") || "{}");
+        } catch (e) {}
+
+        const totalOrdersCount = orderList.length;
+
+        tbody.innerHTML = orderList.map((order, index) => {
+            const sequentialId = totalOrdersCount - index;
+
+            // Resolve real customer profile details
+            const name = order.customer_name || savedProfile.name || (order.user ? (order.user.full_name || order.user.username) : "Customer");
+            const email = order.customer_email || savedProfile.email || (order.user ? order.user.email : "");
+            const phone = order.customer_phone || savedProfile.phone || "";
+            const address = order.shipping_address || savedProfile.address || "";
+
+            const dateStr = order.created_at ? new Date(order.created_at).toLocaleString("en-IN") : "Recent";
+            const total = Number(order.total_amount || order.total_price || order.total || 0).toLocaleString("en-IN");
+            const statusName = order.status ? (order.status.name || order.status) : "PENDING";
 
             return `
-                <div class="order-card">
-                    <div class="order-header">
-                        <div>
-                            <h3 style="margin: 0; color: #0f172a; font-size: 1.15rem;">Order #${order.id}</h3>
-                            <span style="font-size: 0.8rem; color: #64748b;">Placed on: ${orderDate}</span>
-                        </div>
-                        <span class="status-badge">
-                            ${escapeHtml(order.status ? (order.status.name || order.status) : "PENDING")}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; font-weight: 700; color: #0f172a;">#${sequentialId}</td>
+                    <td style="padding: 12px;">
+                        <strong style="color: #0f172a; display: block;">${escapeHtml(name)}</strong>
+                        <span style="font-size: 0.8rem; color: #64748b;">${escapeHtml(email)}${phone ? ' | 📞 ' + escapeHtml(phone) : ''}</span>
+                        ${address ? `<br><small style="color: #64748b;">📍 ${escapeHtml(address)}</small>` : ''}
+                    </td>
+                    <td style="padding: 12px; font-weight: 700; color: #2563eb;">₹${total}</td>
+                    <td style="padding: 12px;">
+                        <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                            ${escapeHtml(statusName)}
                         </span>
-                    </div>
-
-                    <!-- CUSTOMER & DELIVERY DETAILS -->
-                    <div class="order-details-grid">
-                        <div>
-                            <strong style="color: #475569; display: block; font-size: 0.75rem; text-transform: uppercase;">Customer Details</strong>
-                            <span style="color: #0f172a; font-weight: 700; display: block;">${escapeHtml(customerName)}</span>
-                            <span style="color: #64748b; font-size: 0.8rem;">${escapeHtml(customerEmail)}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #475569; display: block; font-size: 0.75rem; text-transform: uppercase;">Delivery Address</strong>
-                            <span style="color: #0f172a; font-weight: 600;">${escapeHtml(address)}</span>
-                        </div>
-                    </div>
-
-                    <!-- ORDER ITEMS -->
-                    <div style="margin-bottom: 1rem;">
-                        ${(order.items || []).map(item => `
-                            <div class="order-item-row">
-                                <span>${escapeHtml(item.product ? item.product.name : (item.name || 'Product'))} × ${item.quantity}</span>
-                                <strong style="color: #0f172a;">₹${Number((item.price || 0) * item.quantity).toLocaleString("en-IN")}</strong>
-                            </div>
-                        `).join('')}
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px;">
-                        <span style="font-weight: 600; color: #475569;">Total Paid:</span>
-                        <span style="font-size: 1.2rem; font-weight: 800; color: #2563eb;">₹${totalAmount}</span>
-                    </div>
-                </div>
+                    </td>
+                    <td style="padding: 12px; font-size: 0.85rem; color: #64748b;">${dateStr}</td>
+                </tr>
             `;
         }).join("");
     } catch (err) {
-        console.error("LOAD ORDERS ERROR:", err);
-        container.innerHTML = `<p style="text-align: center; color: #ef4444; padding: 3rem;">Error loading orders.</p>`;
+        console.error("SUPERADMIN LOAD ORDERS ERROR:", err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 2rem;">Error populating orders list.</td></tr>`;
     }
 }
 

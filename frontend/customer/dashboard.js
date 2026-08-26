@@ -7,29 +7,138 @@ if (typeof API_URL === "undefined") {
 let allProducts = [];
 let allCategories = [];
 let shoppingCart = [];
+let currentUserObj = null;
+let customerProfile = {
+    name: "",
+    email: "",
+    phone: "",
+    address: ""
+};
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
-        const user = await protectPage(["CUSTOMER", "ADMIN", "SUPERADMIN"]);
+        const user = await protectPage(["CUSTOMER", "ADMIN", "SUPERADMIN", "customer", "admin", "superadmin"]);
         if (!user) return;
 
-        displayUserProfile(user);
+        currentUserObj = user;
+        initUserProfile(user);
         await loadStoreData();
     } catch (error) {
         console.error("CUSTOMER DASHBOARD ERROR:", error);
     }
 });
 
-function displayUserProfile(user) {
+function initUserProfile(user) {
+    const savedProfile = localStorage.getItem("customer_profile_details");
+    if (savedProfile) {
+        try {
+            customerProfile = JSON.parse(savedProfile);
+        } catch (e) {
+            console.error("Failed to parse local profile data", e);
+        }
+    }
+
+    if (!customerProfile.name) customerProfile.name = user.full_name || user.username || user.name || "Customer";
+    if (!customerProfile.email) customerProfile.email = user.email || "";
+
+    updateNavProfileUI();
+}
+
+function updateNavProfileUI() {
     const nameEl = document.getElementById("navUserName");
     const roleEl = document.getElementById("navUserRole");
     const avatarEl = document.getElementById("profileAvatar");
 
-    const userName = user.full_name || user.username || user.email || "Customer";
+    const displayName = customerProfile.name || "Customer";
+    const userRole = (currentUserObj && currentUserObj.role) ? (currentUserObj.role.name || currentUserObj.role) : "CUSTOMER";
 
-    if (nameEl) nameEl.textContent = userName;
-    if (roleEl) roleEl.textContent = user.role ? (user.role.name || user.role) : "Customer";
-    if (avatarEl) avatarEl.textContent = userName.charAt(0).toUpperCase();
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = String(userRole).toUpperCase();
+    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+}
+
+function openProfileModal() {
+    document.getElementById("profName").value = customerProfile.name || "";
+    document.getElementById("profEmail").value = customerProfile.email || "";
+    document.getElementById("profPhone").value = customerProfile.phone || "";
+    document.getElementById("profAddress").value = customerProfile.address || "";
+
+    document.querySelectorAll("#profileModal .error-msg").forEach(el => el.style.display = "none");
+
+    document.getElementById("profileModal")?.classList.add("show");
+    document.getElementById("cartOverlay")?.classList.add("show");
+}
+
+function closeProfileModal() {
+    document.getElementById("profileModal")?.classList.remove("show");
+    if (!document.getElementById("cartDrawer")?.classList.contains("open")) {
+        document.getElementById("cartOverlay")?.classList.remove("show");
+    }
+}
+
+function closeAllModals() {
+    document.getElementById("cartDrawer")?.classList.remove("open");
+    document.getElementById("profileModal")?.classList.remove("show");
+    document.getElementById("cartOverlay")?.classList.remove("show");
+}
+
+function saveProfileDetails(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("profName").value.trim();
+    const email = document.getElementById("profEmail").value.trim();
+    const phone = document.getElementById("profPhone").value.trim();
+    const address = document.getElementById("profAddress").value.trim();
+
+    // STRICT VALIDATION RULES
+    let isValid = true;
+    
+    // String-only regex for Name (letters and spaces only)
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
+
+    document.querySelectorAll("#profileModal .error-msg").forEach(el => el.style.display = "none");
+
+    // 1. Name String Validation
+    if (name.length < 2 || !nameRegex.test(name)) {
+        const nameErrEl = document.getElementById("profNameErr");
+        if (nameErrEl) {
+            nameErrEl.textContent = "Name must contain letters only (no numbers or special characters).";
+            nameErrEl.style.display = "block";
+        }
+        isValid = false;
+    }
+
+    // 2. Email Validation
+    if (!emailRegex.test(email)) {
+        const emailErrEl = document.getElementById("profEmailErr");
+        if (emailErrEl) emailErrEl.style.display = "block";
+        isValid = false;
+    }
+
+    // 3. Phone Validation
+    if (!phoneRegex.test(phone)) {
+        const phoneErrEl = document.getElementById("profPhoneErr");
+        if (phoneErrEl) phoneErrEl.style.display = "block";
+        isValid = false;
+    }
+
+    // 4. Address Validation
+    if (address.length < 10) {
+        const addrErrEl = document.getElementById("profAddressErr");
+        if (addrErrEl) addrErrEl.style.display = "block";
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    customerProfile = { name, email, phone, address };
+    localStorage.setItem("customer_profile_details", JSON.stringify(customerProfile));
+
+    updateNavProfileUI();
+    closeProfileModal();
+    alert("Profile details updated successfully!");
 }
 
 async function loadStoreData() {
@@ -76,34 +185,19 @@ function filterByCategory(catId, btnEl) {
     }
 }
 
-// MULTI-IMAGE DISK RESOLVER
 function getProductImagesList(product) {
     const images = [];
-
     if (product.image_url && product.image_url.trim() !== "") {
         images.push(product.image_url.trim());
     }
 
     const nameLower = (product.name || "").toLowerCase();
-
     if (nameLower.includes("laptop")) {
-        images.push(
-            "/frontend/images/laptop-1.jpg",
-            "/frontend/images/laptop-2.jpg",
-            "/frontend/images/laptop-3.jpg",
-            "/frontend/images/laptop-4.jpg",
-            "/frontend/images/laptop-5.jpg"
-        );
-    } else if (nameLower.includes("shirt") || nameLower.includes("t-shirt") || nameLower.includes("t-shirts")) {
-        images.push(
-            "/frontend/images/T-Shirt-1.jpg",
-            "/frontend/images/T-Shirt-3.jpg",
-            "/frontend/images/T-Shirt-4.jpg"
-        );
+        images.push("/frontend/images/laptop-1.jpg", "/frontend/images/laptop-2.jpg", "/frontend/images/laptop-3.jpg", "/frontend/images/laptop-4.jpg", "/frontend/images/laptop-5.jpg");
+    } else if (nameLower.includes("shirt") || nameLower.includes("t-shirt")) {
+        images.push("/frontend/images/T-Shirt-1.jpg", "/frontend/images/T-Shirt-3.jpg", "/frontend/images/T-Shirt-4.jpg");
     } else if (nameLower.includes("burger")) {
-        images.push(
-            "/frontend/images/Burger.jpg"
-        );
+        images.push("/frontend/images/Burger.jpg");
     }
 
     return [...new Set(images)];
@@ -111,9 +205,7 @@ function getProductImagesList(product) {
 
 function switchProductImage(productId, newSrc, thumbEl) {
     const mainImg = document.getElementById(`main-img-${productId}`);
-    if (mainImg) {
-        mainImg.src = newSrc;
-    }
+    if (mainImg) mainImg.src = newSrc;
 
     const card = thumbEl.closest('.product-card');
     if (card) {
@@ -267,14 +359,23 @@ async function checkoutOrder() {
         return;
     }
 
-    const shippingAddress = prompt("Enter your complete delivery address:");
-    if (!shippingAddress || shippingAddress.trim() === "") {
-        alert("Delivery address is required to complete your order.");
+    // Force load latest saved profile details from localStorage
+    const saved = localStorage.getItem("customer_profile_details");
+    if (saved) {
+        try { customerProfile = JSON.parse(saved); } catch (e) {}
+    }
+
+    if (!customerProfile.name || !customerProfile.phone || !customerProfile.address) {
+        alert("Please complete your profile details (Name, Phone & Address) first.");
+        openProfileModal();
         return;
     }
 
     const orderPayload = {
-        shipping_address: shippingAddress.trim(),
+        customer_name: customerProfile.name,
+        customer_email: customerProfile.email,
+        customer_phone: customerProfile.phone,
+        shipping_address: customerProfile.address,
         items: shoppingCart.map(item => ({
             product_id: item.id,
             quantity: item.qty
@@ -292,7 +393,7 @@ async function checkoutOrder() {
             alert("Order placed successfully!");
             shoppingCart = [];
             updateCartUI();
-            toggleCart();
+            closeAllModals();
             await loadStoreData();
         } else {
             const err = await response.json().catch(() => ({}));
