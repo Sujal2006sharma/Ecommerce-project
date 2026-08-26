@@ -1,377 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Product Management</title>
-
-    <link rel="stylesheet" href="style.css">
+    <title>Redirecting...</title>
 </head>
-
 <body>
-    <!-- Navbar -->
-<nav class="navbar">
-
-    <div class="navbar-brand">
-        Product Management
-    </div>
-
-    <div class="navbar-right">
-        Admin
-    </div>
-
-</nav>
-
-
-<!-- Main Layout -->
-<div class="app-layout">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-
-        <div class="sidebar-title">
-            MENU
-        </div>
-
-        <button
-            class="sidebar-item active"
-            onclick="window.location.href='index.html'"
-        >
-            📦 Products
-        </button>
-
-        <button
-            class="sidebar-item"
-            onclick="window.location.href='categories.html'"
-        >
-            🗂 Categories
-        </button>
-
-    </aside>
-
-
-    <!-- Page Content -->
-    <main class="main-content">
-
-    <!-- Main Container -->
-    <div class="container">
-
-        <!-- Header -->
-        <div class="header">
-
-            <div>
-                <h1>Products</h1>
-                <p>Manage your products</p>
-            </div>
-<div class="header-buttons">
-
-    <button
-        class="delete-all-btn"
-        onclick="deleteAllProducts()"
-    >
-        Delete All Products
-    </button>
-
-    <button
-        class="add-btn"
-        onclick="openAddModal()"
-    >
-        + Add Product
-    </button>
-
-</div>
-        </div>
-
-
-        <!-- Message -->
-        <div id="message"></div>
-
-
-        <!-- Product Table Card -->
-        <div class="table-card">
-
-            <table>
-
-                <thead>
-                    <tr>
-
-                        <th>
-                            <input type="checkbox" id="selectAll">
-                        </th>
-
-                        <th>PRODUCT</th>
-                        <th>CATEGORY</th>
-                        <th>STOCK</th>
-                        <th>SKU</th>
-                        <th>PRICE</th>
-                        <th>QTY</th>
-                        <th>STATUS</th>
-                        <th>ACTIONS</th>
-
-                    </tr>
-                </thead>
-
-                <tbody id="productTableBody">
-                    <!-- Products will be inserted here by JavaScript -->
-                </tbody>
-
-            </table>
-
-
-            <!-- Empty Message -->
-            <div
-                id="emptyMessage"
-                class="empty-message"
-            >
-                No products found.
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- Add/Edit Product Modal -->
-    <div
-        id="productModal"
-        class="modal"
-    >
-
-        <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header">
-
-                <h2 id="modalTitle">
-                    Add Product
-                </h2>
-
-                <span
-                    class="close"
-                    onclick="closeModal()"
-                >
-                    &times;
-                </span>
-
-            </div>
-
-
-            <!-- Product ID -->
-            <div
-                class="form-group"
-                id="productIdGroup"
-            >
-
-                <label for="productId">
-                    Product ID
-                </label>
-
-                <input
-                    type="number"
-                    id="productId"
-                    disabled
-                >
-
-            </div>
-
-
-            <!-- Product Name -->
-            <div class="form-group">
-
-                <label for="productName">
-                    Product Name
-                </label>
-
-                <input
-                    type="text"
-                    id="productName"
-                    placeholder="Enter product name"
-                >
-
-            </div>
-
-
-            <!-- Product Price -->
-            <div class="form-group">
-
-                <label for="productPrice">
-                    Price
-                </label>
-
-                <input
-                    type="number"
-                    id="productPrice"
-                    placeholder="Enter price"
-                    step="0.01"
-                >
-
-            </div>
-
-
-            <!-- Product Quantity -->
-            <div class="form-group">
-
-                <label for="productQuantity">
-                    Quantity
-                </label>
-
-                <input
-                    type="number"
-                    id="productQuantity"
-                    placeholder="Enter quantity"
-                >
-
-            </div>
-
-<!-- Product Category -->
-<div class="form-group">
-
-    <label for="productCategory">
-        Category
-    </label>
-
-    <div class="category-select-wrapper">
-
-        <select id="productCategory" class="category-select">
-
-            <option value="">
-                Select a category
-            </option>
-
-        </select>
-
-    </div>
-
-</div>
-
-            <!-- Add Product Button -->
-            <div class="modal-buttons">
-
-                <button
-                    class="cancel-btn"
-                    onclick="closeModal()"
-                >
-                    Cancel
-                </button>
-                <button
-                    class="save-btn"
-                    onclick="saveProduct()"
-                >
-                    Save Product
-                </button>
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Product Image Gallery Modal -->
-    <div id="imageGalleryModal" class="gallery-modal">
-
-        <div class="gallery-content">
-
-            <!-- Gallery Header -->
-            <div class="gallery-header">
-
-                <div>
-                    <h2 id="galleryProductName">
-                        Product Images
-                    </h2>
-
-                    <p id="galleryProductInfo">
-                        Product gallery
-                    </p>
-                </div>
-
-                <span
-                    class="gallery-close"
-                    onclick="closeImageGallery()"
-                >
-                    &times;
-                </span>
-
-            </div>
-
-
-            <!-- Main Image -->
-            <div class="gallery-main">
-
-                <button
-                    class="gallery-arrow gallery-prev"
-                    onclick="previousImage()"
-                >
-                    &#10094;
-                </button>
-
-                <img
-                    id="galleryMainImage"
-                    src=""
-                    alt="Product Image"
-                >
-
-                <button
-                    class="gallery-arrow gallery-next"
-                    onclick="nextImage()"
-                >
-                    &#10095;
-                </button>
-
-            </div>
-
-
-            <!-- Image Counter -->
-            <div
-                id="galleryCounter"
-                class="gallery-counter"
-            >
-                1 / 5
-            </div>
-
-
-            <!-- Thumbnails -->
-            <div
-                id="galleryThumbnails"
-                class="gallery-thumbnails"
-            >
-                <!-- Thumbnails added by JavaScript -->
-            </div>
-            <!-- Upload New Product Images -->
-<div class="gallery-upload">
-
-    <label for="galleryImageUpload">
-        Add Product Images
-    </label>
-
-    <input
-        type="file"
-        id="galleryImageUpload"
-        accept="image/*"
-        multiple
-    >
-
-    <button
-        type="button"
-        class="gallery-upload-btn"
-        onclick="uploadGalleryImages()"
-    >
-        Upload Images
-    </button>
-
-</div>
-
-        </div>
-
-    </div>
-
-    <!-- Shared Authentication -->
     <script src="shared/auth.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            try {
+                // If token exists, check role and redirect
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    window.location.href = "auth/login.html";
+                    return;
+                }
 
-    <!-- Product Script -->
-    <script src="script.js">
-
+                const res = await authFetch("http://127.0.0.1:8000/auth/me");
+                if (res && res.ok) {
+                    const user = await res.json();
+                    const role = typeof user.role === "string" ? user.role : (user.role?.name || "CUSTOMER");
+                    
+                    if (role === "SUPERADMIN") {
+                        window.location.href = "superadmin/dashboard.html";
+                    } else if (role === "ADMIN") {
+                        window.location.href = "admin/dashboard.html";
+                    } else {
+                        window.location.href = "customer/dashboard.html";
+                    }
+                } else {
+                    window.location.href = "auth/login.html";
+                }
+            } catch(e) {
+                window.location.href = "auth/login.html";
+            }
+        });
     </script>
-
 </body>
 </html>

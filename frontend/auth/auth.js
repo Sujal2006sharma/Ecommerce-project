@@ -1,6 +1,5 @@
 "use strict";
 
-
 // =====================================================
 // GET ELEMENTS
 // =====================================================
@@ -10,12 +9,10 @@ const loginForm =
         "loginForm"
     );
 
-
 const message =
     document.getElementById(
         "message"
     );
-
 
 // =====================================================
 // LOGIN FORM SUBMIT
@@ -29,7 +26,6 @@ if (loginForm) {
 
             event.preventDefault();
 
-
             // =========================================
             // GET VALUES
             // =========================================
@@ -39,12 +35,10 @@ if (loginForm) {
                     "username"
                 ).value.trim();
 
-
             const password =
                 document.getElementById(
                     "password"
                 ).value;
-
 
             // =========================================
             // VALIDATION
@@ -64,7 +58,6 @@ if (loginForm) {
 
             }
 
-
             // =========================================
             // LOGIN BUTTON
             // =========================================
@@ -74,14 +67,11 @@ if (loginForm) {
                     "button[type='submit']"
                 );
 
-
             loginButton.disabled =
                 true;
 
-
             loginButton.textContent =
                 "Logging in...";
-
 
             try {
 
@@ -95,7 +85,6 @@ if (loginForm) {
                         password
                     );
 
-
                 // =====================================
                 // SUCCESS MESSAGE
                 // =====================================
@@ -104,7 +93,6 @@ if (loginForm) {
                     "Login successful. Redirecting...",
                     "success"
                 );
-
 
                 // =====================================
                 // REDIRECT USER BY ROLE
@@ -130,17 +118,14 @@ if (loginForm) {
                     error
                 );
 
-
                 showMessage(
                     error.message ||
                     "Login failed.",
                     "error"
                 );
 
-
                 loginButton.disabled =
                     false;
-
 
                 loginButton.textContent =
                     "Login";
@@ -152,6 +137,22 @@ if (loginForm) {
 
 }
 
+// =====================================================
+// REDIRECT BY ROLE
+// =====================================================
+
+function redirectByRole(role) {
+    const roleName = typeof role === "string" ? role : (role?.name || "CUSTOMER");
+    const upperRole = String(roleName).toUpperCase();
+
+    if (upperRole === "SUPERADMIN") {
+        window.location.href = "../superadmin/dashboard.html";
+    } else if (upperRole === "ADMIN") {
+        window.location.href = "../admin/dashboard.html";
+    } else {
+        window.location.href = "../customer/dashboard.html";
+    }
+}
 
 // =====================================================
 // SHOW MESSAGE
@@ -170,10 +171,8 @@ function showMessage(
 
     }
 
-
     message.textContent =
         text;
-
 
     message.className =
         `message ${type}`;
