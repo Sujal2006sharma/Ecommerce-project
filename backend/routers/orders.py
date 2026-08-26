@@ -195,6 +195,10 @@ def create_order(
         # REDUCE INVENTORY STOCK
         product.quantity -= item.quantity
 
+        # AUTOMATIC RESTOCK TRIGGER IF PRODUCT HITS 0 OR LESS
+        if product.quantity <= 0:
+            product.quantity = 10  # Instantly replenishes back to 10 units
+
         order_item = OrderItem(
             order_id=new_order.id,
             product_id=product.id,
@@ -222,9 +226,6 @@ def create_order(
 # =====================================================
 # GET ORDERS (UNIFIED ROUTE)
 # GET /orders
-#
-# CUSTOMER: Returns logged-in user's orders
-# ADMIN & SUPERADMIN: Returns ALL system orders
 # =====================================================
 
 @router.get(
@@ -351,7 +352,7 @@ def get_order(
 
 
 # =====================================================
-# UPDATE ORDER STATUS
+# UPDATE ORDER STATUS & RESTOCK ON CANCEL
 # PUT /orders/{order_id}/status
 # =====================================================
 
@@ -385,6 +386,13 @@ def update_order_status(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Status not found"
         )
+
+    # AUTOMATIC RESTOCK ON CANCELLATION
+    if order_status.name.lower() == "cancelled" and (not order.status or order.status.name.lower() != "cancelled"):
+        for item in order.items:
+            product = db.query(Product).filter(Product.id == item.product_id).first()
+            if product:
+                product.quantity += item.quantity  # Add items back into stock count
 
     order.status_id = order_status.id
 
