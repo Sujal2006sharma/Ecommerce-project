@@ -8,148 +8,53 @@ let allProducts = [];
 let allCategories = [];
 let shoppingCart = [];
 let currentUserObj = null;
-let customerProfile = {
-    name: "",
-    email: "",
-    phone: "",
-    address: ""
-};
+let customerProfile = { name: "", email: "", phone: "", address: "" };
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
-        const user = await protectPage(["CUSTOMER", "ADMIN", "SUPERADMIN", "customer", "admin", "superadmin"]);
-        if (!user) return;
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+            try { currentUserObj = JSON.parse(savedUser); } catch (e) {}
+        }
 
-        currentUserObj = user;
-        initUserProfile(user);
+        initUserProfile();
         await loadStoreData();
     } catch (error) {
-        console.error("CUSTOMER DASHBOARD ERROR:", error);
+        console.error("STOREFRONT INIT ERROR:", error);
     }
 });
 
-function initUserProfile(user) {
+function initUserProfile() {
     const savedProfile = localStorage.getItem("customer_profile_details");
     if (savedProfile) {
-        try {
-            customerProfile = JSON.parse(savedProfile);
-        } catch (e) {
-            console.error("Failed to parse local profile data", e);
-        }
+        try { customerProfile = JSON.parse(savedProfile); } catch (e) {}
     }
 
-    if (!customerProfile.name) customerProfile.name = user.full_name || user.username || user.name || "Customer";
-    if (!customerProfile.email) customerProfile.email = user.email || "";
-
-    updateNavProfileUI();
-}
-
-function updateNavProfileUI() {
-    const nameEl = document.getElementById("navUserName");
-    const roleEl = document.getElementById("navUserRole");
-    const avatarEl = document.getElementById("profileAvatar");
-
-    const displayName = customerProfile.name || "Customer";
-    const userRole = (currentUserObj && currentUserObj.role) ? (currentUserObj.role.name || currentUserObj.role) : "CUSTOMER";
-
-    if (nameEl) nameEl.textContent = displayName;
-    if (roleEl) roleEl.textContent = String(userRole).toUpperCase();
-    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
-}
-
-function openProfileModal() {
-    document.getElementById("profName").value = customerProfile.name || "";
-    document.getElementById("profEmail").value = customerProfile.email || "";
-    document.getElementById("profPhone").value = customerProfile.phone || "";
-    document.getElementById("profAddress").value = customerProfile.address || "";
-
-    document.querySelectorAll("#profileModal .error-msg").forEach(el => el.style.display = "none");
-
-    document.getElementById("profileModal")?.classList.add("show");
-    document.getElementById("cartOverlay")?.classList.add("show");
-}
-
-function closeProfileModal() {
-    document.getElementById("profileModal")?.classList.remove("show");
-    if (!document.getElementById("cartDrawer")?.classList.contains("open")) {
-        document.getElementById("cartOverlay")?.classList.remove("show");
+    if (currentUserObj) {
+        if (!customerProfile.name) customerProfile.name = currentUserObj.full_name || currentUserObj.username || currentUserObj.name || "Customer";
+        if (!customerProfile.email) customerProfile.email = currentUserObj.email || "";
     }
-}
-
-function closeAllModals() {
-    document.getElementById("cartDrawer")?.classList.remove("open");
-    document.getElementById("profileModal")?.classList.remove("show");
-    document.getElementById("cartOverlay")?.classList.remove("show");
-}
-
-function saveProfileDetails(event) {
-    event.preventDefault();
-
-    const name = document.getElementById("profName").value.trim();
-    const email = document.getElementById("profEmail").value.trim();
-    const phone = document.getElementById("profPhone").value.trim();
-    const address = document.getElementById("profAddress").value.trim();
-
-    // STRICT VALIDATION RULES
-    let isValid = true;
-    
-    // String-only regex for Name (letters and spaces only)
-    const nameRegex = /^[a-zA-Z\s]+$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[6-9]\d{9}$/;
-
-    document.querySelectorAll("#profileModal .error-msg").forEach(el => el.style.display = "none");
-
-    // 1. Name String Validation
-    if (name.length < 2 || !nameRegex.test(name)) {
-        const nameErrEl = document.getElementById("profNameErr");
-        if (nameErrEl) {
-            nameErrEl.textContent = "Name must contain letters only (no numbers or special characters).";
-            nameErrEl.style.display = "block";
-        }
-        isValid = false;
-    }
-
-    // 2. Email Validation
-    if (!emailRegex.test(email)) {
-        const emailErrEl = document.getElementById("profEmailErr");
-        if (emailErrEl) emailErrEl.style.display = "block";
-        isValid = false;
-    }
-
-    // 3. Phone Validation
-    if (!phoneRegex.test(phone)) {
-        const phoneErrEl = document.getElementById("profPhoneErr");
-        if (phoneErrEl) phoneErrEl.style.display = "block";
-        isValid = false;
-    }
-
-    // 4. Address Validation
-    if (address.length < 10) {
-        const addrErrEl = document.getElementById("profAddressErr");
-        if (addrErrEl) addrErrEl.style.display = "block";
-        isValid = false;
-    }
-
-    if (!isValid) return;
-
-    customerProfile = { name, email, phone, address };
-    localStorage.setItem("customer_profile_details", JSON.stringify(customerProfile));
-
-    updateNavProfileUI();
-    closeProfileModal();
-    alert("Profile details updated successfully!");
 }
 
 async function loadStoreData() {
+    const grid = document.getElementById("productGrid");
     try {
+        // Safe fetch handler for guests and authenticated users
+        const customFetch = async (url) => {
+            const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+            const headers = {};
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+            
+            return await fetch(url, { headers });
+        };
+
         const [pRes, cRes] = await Promise.all([
-            authFetch(`${API_URL}/products`).catch(() => null),
-            authFetch(`${API_URL}/categories`).catch(() => null)
+            customFetch(`${API_URL}/products`).catch(() => null),
+            customFetch(`${API_URL}/categories`).catch(() => null)
         ]);
 
-        const prodData = pRes && pRes.ok ? await pRes.json() : [];
-        const catData = cRes && cRes.ok ? await cRes.json() : [];
+        const prodData = (pRes && pRes.ok) ? await pRes.json() : [];
+        const catData = (cRes && cRes.ok) ? await cRes.json() : [];
 
         allProducts = Array.isArray(prodData) ? prodData : (prodData.data || []);
         allCategories = Array.isArray(catData) ? catData : (catData.data || []);
@@ -158,6 +63,9 @@ async function loadStoreData() {
         renderProductGrid(allProducts);
     } catch (err) {
         console.error("DATA FETCH ERROR:", err);
+        if (grid) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #ef4444;">Failed to load products. Make sure backend is running.</div>`;
+        }
     }
 }
 
@@ -193,31 +101,14 @@ function getProductImagesList(product) {
 
     const nameLower = (product.name || "").toLowerCase();
     if (nameLower.includes("laptop")) {
-        images.push("/frontend/images/laptop-1.jpg", "/frontend/images/laptop-2.jpg", "/frontend/images/laptop-3.jpg", "/frontend/images/laptop-4.jpg", "/frontend/images/laptop-5.jpg");
+        images.push("/frontend/images/laptop-1.jpg", "/frontend/images/laptop-2.jpg");
     } else if (nameLower.includes("shirt") || nameLower.includes("t-shirt")) {
-        images.push("/frontend/images/T-Shirt-1.jpg", "/frontend/images/T-Shirt-3.jpg", "/frontend/images/T-Shirt-4.jpg");
+        images.push("/frontend/images/T-Shirt-1.jpg");
     } else if (nameLower.includes("burger")) {
         images.push("/frontend/images/Burger.jpg");
     }
 
     return [...new Set(images)];
-}
-
-function switchProductImage(productId, newSrc, thumbEl) {
-    const mainImg = document.getElementById(`main-img-${productId}`);
-    if (mainImg) mainImg.src = newSrc;
-
-    const card = thumbEl.closest('.product-card');
-    if (card) {
-        card.querySelectorAll('.thumbnail-img').forEach(t => t.classList.remove('active'));
-        thumbEl.classList.add('active');
-    }
-}
-
-function handleImageError(imgEl, fallbackPath) {
-    if (imgEl.getAttribute("data-tried-fallback")) return;
-    imgEl.setAttribute("data-tried-fallback", "true");
-    imgEl.src = fallbackPath;
 }
 
 function renderProductGrid(products) {
@@ -235,48 +126,28 @@ function renderProductGrid(products) {
         const categoryName = p.category ? (p.category.name || p.category) : "General";
         const inStock = Number(p.quantity) > 0;
 
-        const thumbnailsHtml = imagesList.length > 1 ? `
-            <div class="product-thumbnails">
-                ${imagesList.map((img, idx) => {
-                    const relativeFallback = img.startsWith('/frontend/') ? img.replace('/frontend/', '../') : img;
-                    return `
-                        <img src="${img}" 
-                             class="thumbnail-img ${idx === 0 ? 'active' : ''}" 
-                             onclick="switchProductImage(${p.id}, '${img}', this)"
-                             onerror="handleImageError(this, '${relativeFallback}')">
-                    `;
-                }).join('')}
-            </div>
-        ` : '';
-
-        const mainRelativeFallback = mainImgUrl.startsWith('/frontend/') ? mainImgUrl.replace('/frontend/', '../') : mainImgUrl;
-
         return `
-            <div class="product-card">
-                <div class="product-image-container">
-                    ${mainImgUrl ? `
-                        <img id="main-img-${p.id}" 
-                             src="${mainImgUrl}" 
-                             class="product-image" 
-                             alt="${escapeHtml(p.name)}"
-                             onerror="handleImageError(this, '${mainRelativeFallback}')">
-                    ` : `
-                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-weight:600;">No Image</div>
-                    `}
-                    <span class="stock-tag ${inStock ? 'in-stock' : 'out-stock'}">
-                        ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
-                    </span>
-                </div>
-                ${thumbnailsHtml}
-                <div class="product-info">
-                    <span class="product-category">${escapeHtml(categoryName)}</span>
-                    <h3 class="product-title">${escapeHtml(p.name)}</h3>
-                    <div class="product-bottom">
-                        <span class="product-price">₹${Number(p.price).toLocaleString("en-IN")}</span>
-                        <button class="add-cart-btn" ${!inStock ? 'disabled' : ''} onclick="addToCart(${p.id})">
-                            ${inStock ? '+ Add to Cart' : 'Out of Stock'}
-                        </button>
+            <div class="product-card" style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div>
+                    <div class="product-image-container" style="position: relative; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
+                        ${mainImgUrl ? `
+                            <img src="${mainImgUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" alt="${escapeHtml(p.name)}">
+                        ` : `
+                            <div style="color: #94a3b8; font-weight: 600;">No Image</div>
+                        `}
+                        <span style="position: absolute; top: 8px; left: 8px; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: ${inStock ? '#dcfce7' : '#fee2e2'}; color: ${inStock ? '#15803d' : '#dc2626'};">
+                            ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
+                        </span>
                     </div>
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">${escapeHtml(categoryName)}</span>
+                    <h3 style="font-size: 1.05rem; color: #0f172a; margin: 4px 0 12px 0;">${escapeHtml(p.name)}</h3>
+                </div>
+
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">₹${Number(p.price).toLocaleString("en-IN")}</div>
+                    <button ${!inStock ? 'disabled' : ''} onclick="addToCart(${p.id})" style="width: 100%; background: ${inStock ? '#ffd814' : '#e2e8f0'}; color: #111; border: 1px solid ${inStock ? '#fcd200' : '#cbd5e1'}; padding: 10px; border-radius: 20px; font-weight: 700; cursor: ${inStock ? 'pointer' : 'not-allowed'}; font-size: 0.9rem;">
+                        ${inStock ? 'Add to Cart' : 'Out of Stock'}
+                    </button>
                 </div>
             </div>
         `;
@@ -292,7 +163,7 @@ function addToCart(productId) {
         if (existing.qty < product.quantity) {
             existing.qty++;
         } else {
-            alert("Maximum available stock limit reached!");
+            alert("Maximum stock limit reached!");
             return;
         }
     } else {
@@ -326,12 +197,12 @@ function updateCartUI() {
     if (!cartItems) return;
 
     if (shoppingCart.length === 0) {
-        cartItems.innerHTML = `<p style="text-align: center; color: #64748b; margin-top: 3rem; font-size: 0.95rem;">Your cart is empty.</p>`;
+        cartItems.innerHTML = `<p style="text-align: center; color: #64748b; margin-top: 3rem;">Your cart is empty.</p>`;
         return;
     }
 
     cartItems.innerHTML = shoppingCart.map(item => `
-        <div class="cart-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
             <div>
                 <strong style="color: #0f172a; display: block; font-size: 0.95rem;">${escapeHtml(item.name)}</strong>
                 <span style="color: #64748b; font-size: 0.85rem;">₹${item.price} × ${item.qty}</span>
@@ -354,36 +225,29 @@ function toggleCart() {
 }
 
 async function checkoutOrder() {
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    if (!token) {
+        alert("Please log in to complete your purchase.");
+        window.location.href = "/frontend/auth/login.html";
+        return;
+    }
+
     if (shoppingCart.length === 0) {
         alert("Your cart is empty!");
         return;
     }
 
-    // Force load latest saved profile details from localStorage
-    const saved = localStorage.getItem("customer_profile_details");
-    if (saved) {
-        try { customerProfile = JSON.parse(saved); } catch (e) {}
-    }
-
-    if (!customerProfile.name || !customerProfile.phone || !customerProfile.address) {
-        alert("Please complete your profile details (Name, Phone & Address) first.");
-        openProfileModal();
-        return;
-    }
-
     const orderPayload = {
-        customer_name: customerProfile.name,
-        customer_email: customerProfile.email,
-        customer_phone: customerProfile.phone,
-        shipping_address: customerProfile.address,
-        items: shoppingCart.map(item => ({
-            product_id: item.id,
-            quantity: item.qty
-        }))
+        customer_name: customerProfile.name || "Customer",
+        customer_email: customerProfile.email || "",
+        customer_phone: customerProfile.phone || "",
+        shipping_address: customerProfile.address || "",
+        items: shoppingCart.map(item => ({ product_id: item.id, quantity: item.qty }))
     };
 
     try {
-        const response = await authFetch(`${API_URL}/orders`, {
+        const fetchFunc = typeof authFetch === "function" ? authFetch : fetch;
+        const response = await fetchFunc(`${API_URL}/orders`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(orderPayload)
@@ -393,7 +257,7 @@ async function checkoutOrder() {
             alert("Order placed successfully!");
             shoppingCart = [];
             updateCartUI();
-            closeAllModals();
+            toggleCart();
             await loadStoreData();
         } else {
             const err = await response.json().catch(() => ({}));
@@ -401,7 +265,6 @@ async function checkoutOrder() {
         }
     } catch (err) {
         console.error("CHECKOUT ERROR:", err);
-        alert("Network error. Could not complete order.");
     }
 }
 

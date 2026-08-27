@@ -2,39 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Storefront - Explore Products</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+    <link rel="stylesheet" href="/frontend/customer/customer.css">
 </head>
-<body>
-    <script src="shared/auth.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", async function() {
-            try {
-                // If token exists, check role and redirect
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    window.location.href = "auth/login.html";
-                    return;
-                }
+<body style="margin: 0; background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
 
-                const res = await authFetch("http://127.0.0.1:8000/auth/me");
-                if (res && res.ok) {
-                    const user = await res.json();
-                    const role = typeof user.role === "string" ? user.role : (user.role?.name || "CUSTOMER");
-                    
-                    if (role === "SUPERADMIN") {
-                        window.location.href = "superadmin/dashboard.html";
-                    } else if (role === "ADMIN") {
-                        window.location.href = "admin/dashboard.html";
-                    } else {
-                        window.location.href = "customer/dashboard.html";
-                    }
-                } else {
-                    window.location.href = "auth/login.html";
-                }
-            } catch(e) {
-                window.location.href = "auth/login.html";
-            }
-        });
-    </script>
+    <!-- TOP NAVBAR -->
+    <div id="navbarContainer"></div>
+
+    <!-- MAIN PRODUCT CATALOG -->
+    <main style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+        
+        <header style="margin-bottom: 2rem;">
+            <h1 style="color: #0f172a; margin: 0 0 1rem 0;">Explore Products</h1>
+            <!-- CATEGORY PILLS -->
+            <div id="categoryPills" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        </header>
+
+        <!-- PRODUCTS GRID -->
+        <div id="productGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            <p style="text-align: center; color: #64748b; grid-column: 1 / -1;">Loading products...</p>
+        </div>
+    </main>
+
+    <!-- SHOPPING CART OVERLAY -->
+    <div id="cartOverlay" onclick="toggleCart()" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+    
+    <!-- SHOPPING CART DRAWER -->
+    <div id="cartDrawer" style="position: fixed; top: 0; right: -400px; width: 360px; height: 100%; background: #ffffff; z-index: 1000; transition: right 0.3s ease; padding: 1.5rem; box-sizing: border-box; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; color: #0f172a;">Your Cart</h2>
+            <button onclick="toggleCart()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;">✕</button>
+        </div>
+        <div id="cartItems" style="flex: 1; overflow-y: auto;"></div>
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 700; font-size: 1.1rem;">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button onclick="checkoutOrder()" style="width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem;">
+                Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPT INCLUDES -->
+    <script src="/frontend/shared/auth.js"></script>
+    <script src="/frontend/shared/navbar.js"></script>
+    <script src="/frontend/customer/dashboard.js"></script>
 </body>
 </html>

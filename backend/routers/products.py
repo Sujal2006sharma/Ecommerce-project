@@ -57,20 +57,13 @@ def create_product(
 # =====================================================
 # GET ALL PRODUCTS
 #
-# ALL ROLES
+# PUBLIC ACCESS (GUESTS & ALL ROLES)
+# Removed require_roles dependency so guests can browse
 # =====================================================
 
 @router.get("")
 def get_products(
-    db: Session = Depends(get_db),
-    current_user=Depends(
-        require_roles(
-            "SUPERADMIN",
-            "ADMIN",
-            "SELLER",
-            "CUSTOMER"
-        )
-    )
+    db: Session = Depends(get_db)
 ):
 
     return get_products_service(
@@ -81,21 +74,14 @@ def get_products(
 # =====================================================
 # GET SINGLE PRODUCT
 #
-# ALL ROLES
+# PUBLIC ACCESS (GUESTS & ALL ROLES)
+# Removed require_roles dependency so guests can view details
 # =====================================================
 
 @router.get("/{product_id}")
 def get_product(
     product_id: int,
-    db: Session = Depends(get_db),
-    current_user=Depends(
-        require_roles(
-            "SUPERADMIN",
-            "ADMIN",
-            "SELLER",
-            "CUSTOMER"
-        )
-    )
+    db: Session = Depends(get_db)
 ):
 
     return get_product_service(
