@@ -8,7 +8,6 @@ let allProducts = [];
 let allCategories = [];
 let shoppingCart = [];
 let currentUserObj = null;
-let customerProfile = { name: "", email: "", phone: "", address: "" };
 
 document.addEventListener("DOMContentLoaded", async function () {
     try {
@@ -17,40 +16,39 @@ document.addEventListener("DOMContentLoaded", async function () {
             try { currentUserObj = JSON.parse(savedUser); } catch (e) {}
         }
 
-        initUserProfile();
+        updateHeaderUI();
         await loadStoreData();
     } catch (error) {
-        console.error("STOREFRONT INIT ERROR:", error);
+        console.error("DASHBOARD INIT ERROR:", error);
     }
 });
 
-function initUserProfile() {
-    const savedProfile = localStorage.getItem("customer_profile_details");
-    if (savedProfile) {
-        try { customerProfile = JSON.parse(savedProfile); } catch (e) {}
-    }
+function updateHeaderUI() {
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    const isLoggedIn = Boolean(token);
 
-    if (currentUserObj) {
-        if (!customerProfile.name) customerProfile.name = currentUserObj.full_name || currentUserObj.username || currentUserObj.name || "Customer";
-        if (!customerProfile.email) customerProfile.email = currentUserObj.email || "";
+    const nameEl = document.getElementById("badgeName");
+    const roleEl = document.getElementById("badgeRole");
+    const avatarEl = document.getElementById("badgeAvatar");
+
+    if (isLoggedIn && currentUserObj) {
+        const name = currentUserObj.full_name || currentUserObj.username || "Customer";
+        if (nameEl) nameEl.textContent = name;
+        if (roleEl) roleEl.textContent = "CUSTOMER";
+        if (avatarEl) avatarEl.textContent = name.charAt(0).toUpperCase();
+    } else {
+        if (nameEl) nameEl.textContent = "Guest";
+        if (roleEl) roleEl.textContent = "GUEST";
+        if (avatarEl) avatarEl.textContent = "G";
     }
 }
 
 async function loadStoreData() {
     const grid = document.getElementById("productGrid");
     try {
-        // Safe fetch handler for guests and authenticated users
-        const customFetch = async (url) => {
-            const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-            const headers = {};
-            if (token) headers["Authorization"] = `Bearer ${token}`;
-            
-            return await fetch(url, { headers });
-        };
-
         const [pRes, cRes] = await Promise.all([
-            customFetch(`${API_URL}/products`).catch(() => null),
-            customFetch(`${API_URL}/categories`).catch(() => null)
+            fetch(`${API_URL}/products`).catch(() => null),
+            fetch(`${API_URL}/categories`).catch(() => null)
         ]);
 
         const prodData = (pRes && pRes.ok) ? await pRes.json() : [];
@@ -62,9 +60,9 @@ async function loadStoreData() {
         renderCategoryPills();
         renderProductGrid(allProducts);
     } catch (err) {
-        console.error("DATA FETCH ERROR:", err);
+        console.error("LOAD STORE DATA ERROR:", err);
         if (grid) {
-            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #ef4444;">Failed to load products. Make sure backend is running.</div>`;
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #ef4444;">Failed to load products.</div>`;
         }
     }
 }
@@ -73,17 +71,25 @@ function renderCategoryPills() {
     const container = document.getElementById("categoryPills");
     if (!container) return;
 
-    let html = `<button class="pill-btn active" onclick="filterByCategory('ALL', this)">All Products</button>`;
+    let html = `<button class="pill-btn active" onclick="filterByCategory('ALL', this)" style="padding: 8px 18px; border-radius: 20px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; background: #3b82f6; color: #ffffff;">All Products</button>`;
+    
     allCategories.forEach(cat => {
-        html += `<button class="pill-btn" onclick="filterByCategory(${cat.id}, this)">${escapeHtml(cat.name)}</button>`;
+        html += `<button class="pill-btn" onclick="filterByCategory(${cat.id}, this)" style="padding: 8px 18px; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 600; font-size: 0.85rem; cursor: pointer; background: #ffffff; color: #475569; margin-left: 6px;">${escapeHtml(cat.name)}</button>`;
     });
 
     container.innerHTML = html;
 }
 
 function filterByCategory(catId, btnEl) {
-    document.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
-    btnEl.classList.add("active");
+    document.querySelectorAll("#categoryPills .pill-btn").forEach(b => {
+        b.style.background = "#ffffff";
+        b.style.color = "#475569";
+        b.style.border = "1px solid #e2e8f0";
+    });
+
+    btnEl.style.background = "#3b82f6";
+    btnEl.style.color = "#ffffff";
+    btnEl.style.border = "none";
 
     if (catId === 'ALL') {
         renderProductGrid(allProducts);
@@ -101,7 +107,7 @@ function getProductImagesList(product) {
 
     const nameLower = (product.name || "").toLowerCase();
     if (nameLower.includes("laptop")) {
-        images.push("/frontend/images/laptop-1.jpg", "/frontend/images/laptop-2.jpg");
+        images.push("/frontend/images/laptop-1.jpg");
     } else if (nameLower.includes("shirt") || nameLower.includes("t-shirt")) {
         images.push("/frontend/images/T-Shirt-1.jpg");
     } else if (nameLower.includes("burger")) {
@@ -123,32 +129,30 @@ function renderProductGrid(products) {
     grid.innerHTML = products.map(p => {
         const imagesList = getProductImagesList(p);
         const mainImgUrl = imagesList.length > 0 ? imagesList[0] : "";
-        const categoryName = p.category ? (p.category.name || p.category) : "General";
+        const categoryName = p.category ? (p.category.name || p.category) : "GENERAL";
         const inStock = Number(p.quantity) > 0;
 
         return `
-            <div class="product-card" style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div class="product-card" style="background: #ffffff; border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
                 <div>
-                    <div class="product-image-container" style="position: relative; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
+                    <div style="position: relative; width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 12px; overflow: hidden; margin-bottom: 12px;">
                         ${mainImgUrl ? `
                             <img src="${mainImgUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" alt="${escapeHtml(p.name)}">
                         ` : `
                             <div style="color: #94a3b8; font-weight: 600;">No Image</div>
                         `}
-                        <span style="position: absolute; top: 8px; left: 8px; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: ${inStock ? '#dcfce7' : '#fee2e2'}; color: ${inStock ? '#15803d' : '#dc2626'};">
+                        <span style="position: absolute; top: 10px; left: 10px; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: ${inStock ? '#dcfce7' : '#fee2e2'}; color: ${inStock ? '#15803d' : '#dc2626'};">
                             ${inStock ? `In Stock (${p.quantity})` : 'Sold Out'}
                         </span>
                     </div>
-                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">${escapeHtml(categoryName)}</span>
-                    <h3 style="font-size: 1.05rem; color: #0f172a; margin: 4px 0 12px 0;">${escapeHtml(p.name)}</h3>
+                    <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${escapeHtml(categoryName)}</span>
+                    <h3 style="font-size: 1rem; color: #0f172a; margin: 4px 0 10px 0; font-weight: 700;">${escapeHtml(p.name)}</h3>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">₹${Number(p.price).toLocaleString("en-IN")}</div>
                 </div>
 
-                <div>
-                    <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">₹${Number(p.price).toLocaleString("en-IN")}</div>
-                    <button ${!inStock ? 'disabled' : ''} onclick="addToCart(${p.id})" style="width: 100%; background: ${inStock ? '#ffd814' : '#e2e8f0'}; color: #111; border: 1px solid ${inStock ? '#fcd200' : '#cbd5e1'}; padding: 10px; border-radius: 20px; font-weight: 700; cursor: ${inStock ? 'pointer' : 'not-allowed'}; font-size: 0.9rem;">
-                        ${inStock ? 'Add to Cart' : 'Out of Stock'}
-                    </button>
-                </div>
+                <button ${!inStock ? 'disabled' : ''} onclick="addToCart(${p.id})" style="width: 100%; background: ${inStock ? '#ffc107' : '#e2e8f0'}; color: #000000; border: none; padding: 10px; border-radius: 20px; font-weight: 700; cursor: ${inStock ? 'pointer' : 'not-allowed'}; font-size: 0.9rem;">
+                    ${inStock ? 'Add to Cart' : 'Out of Stock'}
+                </button>
             </div>
         `;
     }).join("");
@@ -219,16 +223,26 @@ function toggleCart() {
     const drawer = document.getElementById("cartDrawer");
     const overlay = document.getElementById("cartOverlay");
     if (drawer && overlay) {
-        drawer.classList.toggle("open");
-        overlay.classList.toggle("show");
+        drawer.style.right = drawer.style.right === "0px" ? "-400px" : "0px";
+        overlay.style.display = overlay.style.display === "block" ? "none" : "block";
     }
 }
 
-async function checkoutOrder() {
+function closeAllModals() {
+    const drawer = document.getElementById("cartDrawer");
+    const overlay = document.getElementById("cartOverlay");
+    const modal = document.getElementById("loginRequiredModal");
+
+    if (drawer) drawer.style.right = "-400px";
+    if (overlay) overlay.style.display = "none";
+    if (modal) modal.style.display = "none";
+}
+
+function handleCheckoutClick() {
     const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+
     if (!token) {
-        alert("Please log in to complete your purchase.");
-        window.location.href = "/frontend/auth/login.html";
+        document.getElementById("loginRequiredModal").style.display = "flex";
         return;
     }
 
@@ -237,11 +251,44 @@ async function checkoutOrder() {
         return;
     }
 
+    processOrder();
+}
+
+function closeLoginModal() {
+    document.getElementById("loginRequiredModal").style.display = "none";
+}
+
+function handleMyOrdersClick(e) {
+    e.preventDefault();
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    if (!token) {
+        document.getElementById("loginRequiredModal").style.display = "flex";
+    } else {
+        window.location.href = "/frontend/customer/orders.html";
+    }
+}
+
+function handleAuthAction() {
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    if (token) {
+        localStorage.clear();
+        window.location.reload();
+    } else {
+        window.location.href = "/frontend/auth/login.html";
+    }
+}
+
+async function processOrder() {
+    let savedProfile = {};
+    try {
+        savedProfile = JSON.parse(localStorage.getItem("customer_profile_details") || "{}");
+    } catch(e) {}
+
     const orderPayload = {
-        customer_name: customerProfile.name || "Customer",
-        customer_email: customerProfile.email || "",
-        customer_phone: customerProfile.phone || "",
-        shipping_address: customerProfile.address || "",
+        customer_name: savedProfile.name || currentUserObj.username || "Customer",
+        customer_email: savedProfile.email || currentUserObj.email || "",
+        customer_phone: savedProfile.phone || "",
+        shipping_address: savedProfile.address || "",
         items: shoppingCart.map(item => ({ product_id: item.id, quantity: item.qty }))
     };
 
@@ -257,14 +304,14 @@ async function checkoutOrder() {
             alert("Order placed successfully!");
             shoppingCart = [];
             updateCartUI();
-            toggleCart();
+            closeAllModals();
             await loadStoreData();
         } else {
             const err = await response.json().catch(() => ({}));
             alert(err.detail || "Failed to place order.");
         }
     } catch (err) {
-        console.error("CHECKOUT ERROR:", err);
+        console.error("ORDER ERROR:", err);
     }
 }
 
