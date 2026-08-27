@@ -20,7 +20,7 @@
 
             <!-- MENU ITEMS -->
             <nav style="display: flex; flex-direction: column; gap: 8px;">
-                <a href="/frontend/index.html" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem;">
+                <a href="/frontend/customer/dashboard.html" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem;">
                     🛍️ Shop Catalog
                 </a>
                 <a href="#" onclick="handleMyOrdersClick(event)" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: #94a3b8; text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 0.9rem; transition: background 0.2s;">
@@ -41,7 +41,7 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 15px;">
-                <!-- USER PROFILE / LOGIN TRIGGER BADGE -->
+                <!-- USER BADGE -->
                 <div id="userBadge" onclick="handleAuthAction()" style="display: flex; align-items: center; gap: 10px; background: #e0e7ff; padding: 6px 14px; border-radius: 30px; cursor: pointer;">
                     <div id="badgeAvatar" style="width: 28px; height: 28px; border-radius: 50%; background: #4f46e5; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">G</div>
                     <div style="line-height: 1.1;">
@@ -86,16 +86,39 @@
         </div>
     </div>
 
-    <!-- REQUIRED SIGN-IN POPUP MODAL -->
+    <!-- IN-PAGE LOGIN POPUP MODAL -->
     <div id="loginRequiredModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;">
-        <div style="background: #ffffff; border-radius: 16px; width: 380px; padding: 2rem; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-            <div style="width: 60px; height: 60px; background: #e0e7ff; color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1.25rem auto;">🔒</div>
-            <h2 style="margin: 0 0 0.5rem 0; color: #0f172a; font-size: 1.35rem;">Sign In Required</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin: 0 0 1.5rem 0; line-height: 1.5;">Please sign in to your account first to complete your checkout and place this order.</p>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="closeLoginModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
-                <a href="/frontend/auth/login.html" style="flex: 1; background: #2563eb; color: #ffffff; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; text-align: center;">Sign In</a>
+        <div style="background: #ffffff; border-radius: 16px; width: 380px; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; position: relative;">
+            
+            <button onclick="closeLoginModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">✕</button>
+
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="width: 50px; height: 50px; background: #e0e7ff; color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 0.75rem auto;">🔑</div>
+                <h2 style="margin: 0; color: #0f172a; font-size: 1.35rem;">Sign In Required</h2>
+                <p style="color: #64748b; font-size: 0.85rem; margin-top: 4px;">Log in to complete your purchase</p>
             </div>
+
+            <form id="popupLoginForm" onsubmit="handlePopupLogin(event)">
+                <div style="margin-bottom: 1rem; text-align: left;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Username</label>
+                    <input type="text" id="popupUsername" required placeholder="Enter username" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; outline: none; font-size: 0.9rem;">
+                </div>
+
+                <div style="margin-bottom: 1.25rem; text-align: left;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 4px;">Password</label>
+                    <input type="password" id="popupPassword" required placeholder="Enter password" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; outline: none; font-size: 0.9rem;">
+                </div>
+
+                <p id="popupLoginError" style="display: none; color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; text-align: center; font-weight: 600;"></p>
+
+                <button type="submit" style="width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem;">
+                    Login & Complete Checkout
+                </button>
+            </form>
+
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 1.25rem; text-align: center;">
+                Don't have an account? <a href="/frontend/auth/register.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Register</a>
+            </p>
         </div>
     </div>
 

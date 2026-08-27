@@ -69,7 +69,7 @@ document.addEventListener(
             // Protect Admin page
             // -----------------------------------------
 
-            const user = await protectPage(["ADMIN"]);
+            const user = await protectPage(["ADMIN", "SUPERADMIN"]);
 
             if (!user) {
                 return;

@@ -1,125 +1,39 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Login</title>
-
-    <link
-        rel="stylesheet"
-        href="auth.css"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Product Management</title>
+    <link rel="stylesheet" href="/frontend/auth/auth.css">
+    <link rel="stylesheet" href="/frontend/style.css">
 </head>
+<body style="margin: 0; background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
 
+    <div style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; width: 360px; text-align: center;">
+        <h2 style="margin: 0 0 0.25rem 0; color: #0f172a; font-size: 1.5rem; font-weight: 800;">Product Management</h2>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0 0 1.5rem 0;">Login to continue</p>
 
-<body>
-
-    <div class="auth-container">
-
-        <div class="auth-card">
-
-            <h1>
-                Product Management
-            </h1>
-
-            <p>
-                Login to continue
-            </p>
-
-
-            <!-- MESSAGE -->
-
-            <div
-                id="message"
-                class="message"
-            >
+        <form onsubmit="loginUser(event)">
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Username</label>
+                <input type="text" id="username" required placeholder="Enter username" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; outline: none; font-size: 0.9rem;">
             </div>
 
+            <div style="text-align: left; margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Password</label>
+                <input type="password" id="password" required placeholder="Enter password" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; outline: none; font-size: 0.9rem;">
+            </div>
 
-            <!-- LOGIN FORM -->
+            <p id="errorMessage" style="display: none; color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; font-weight: 600;"></p>
 
-            <form id="loginForm">
-
-
-                <!-- USERNAME -->
-
-                <div class="form-group">
-
-                    <label
-                        for="username"
-                    >
-                        Username
-                    </label>
-
-                    <input
-                        type="text"
-                        id="username"
-                        placeholder="Enter username"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- PASSWORD -->
-
-                <div class="form-group">
-
-                    <label
-                        for="password"
-                    >
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Enter password"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- LOGIN BUTTON -->
-
-                <button
-                    type="submit"
-                    class="login-btn"
-                >
-
-                    Login
-
-                </button>
-
-
-            </form>
-
-        </div>
-
+            <button type="submit" style="width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem;">
+                Login
+            </button>
+        </form>
     </div>
 
-
-    <!-- SHARED AUTH -->
-     
-<script src="../shared/auth.js"></script>
-
-    <!-- LOGIN JS -->
-
-    <script
-        src="auth.js"
-    ></script>
-
-
+    <!-- SCRIPT INCLUDES -->
+    <script src="/frontend/shared/auth.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
 </body>
-
 </html>

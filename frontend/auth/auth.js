@@ -1,180 +1,100 @@
 "use strict";
 
-// =====================================================
-// GET ELEMENTS
-// =====================================================
+if (typeof API_URL === "undefined") {
+    var API_URL = "http://127.0.0.1:8000";
+}
 
-const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+async function loginUser(event) {
+    if (event) event.preventDefault();
 
-const message =
-    document.getElementById(
-        "message"
-    );
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const errorMsg = document.getElementById("errorMessage");
 
-// =====================================================
-// LOGIN FORM SUBMIT
-// =====================================================
+    if (!usernameInput || !passwordInput) return;
 
-if (loginForm) {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
 
-    loginForm.addEventListener(
-        "submit",
-        async function (event) {
+    if (errorMsg) errorMsg.style.display = "none";
 
-            event.preventDefault();
+    try {
+        // Sending application/json instead of form-urlencoded
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
 
-            // =========================================
-            // GET VALUES
-            // =========================================
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Save Tokens
+            localStorage.setItem("token", data.access_token);
+            localStorage.setItem("access_token", data.access_token);
+            
+            // Build initial user object
+            let userObj = {
+                username: username,
+                role: data.role ? String(data.role).toUpperCase() : "CUSTOMER"
+            };
 
-            const username =
-                document.getElementById(
-                    "username"
-                ).value.trim();
-
-            const password =
-                document.getElementById(
-                    "password"
-                ).value;
-
-            // =========================================
-            // VALIDATION
-            // =========================================
-
-            if (
-                !username ||
-                !password
-            ) {
-
-                showMessage(
-                    "Please enter username and password.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-            // =========================================
-            // LOGIN BUTTON
-            // =========================================
-
-            const loginButton =
-                loginForm.querySelector(
-                    "button[type='submit']"
-                );
-
-            loginButton.disabled =
-                true;
-
-            loginButton.textContent =
-                "Logging in...";
-
+            // Fetch complete profile from /auth/me
             try {
-
-                // =====================================
-                // LOGIN
-                // =====================================
-
-                const data =
-                    await loginUser(
-                        username,
-                        password
-                    );
-
-                // =====================================
-                // SUCCESS MESSAGE
-                // =====================================
-
-                showMessage(
-                    "Login successful. Redirecting...",
-                    "success"
-                );
-
-                // =====================================
-                // REDIRECT USER BY ROLE
-                // =====================================
-
-                setTimeout(
-                    function () {
-
-                        redirectByRole(
-                            data.role
-                        );
-
-                    },
-                    500
-                );
-
+                const meRes = await fetch(`${API_URL}/auth/me`, {
+                    headers: { "Authorization": `Bearer ${data.access_token}` }
+                });
+                if (meRes.ok) {
+                    const meData = await meRes.json();
+                    userObj = { ...userObj, ...meData };
+                }
+            } catch (meErr) {
+                console.warn("Failed to fetch full user profile:", meErr);
             }
 
-            catch (error) {
+            localStorage.setItem("user", JSON.stringify(userObj));
 
-                console.error(
-                    "LOGIN PAGE ERROR:",
-                    error
-                );
+            // Determine role and redirect to appropriate dashboard
+            const userRole = (userObj.role && userObj.role.name)
+                ? String(userObj.role.name).toUpperCase()
+                : String(userObj.role || "CUSTOMER").toUpperCase();
 
-                showMessage(
-                    error.message ||
-                    "Login failed.",
-                    "error"
-                );
+            if (typeof redirectToDashboard === "function") {
+                redirectToDashboard(userRole);
+            } else if (userRole === "SUPERADMIN") {
+                window.location.href = "/frontend/superadmin/dashboard.html";
+            } else if (userRole === "ADMIN") {
+                window.location.href = "/frontend/admin/dashboard.html";
+            } else if (userRole === "SELLER") {
+                window.location.href = "/frontend/seller/dashboard.html";
+            } else {
+                window.location.href = "/frontend/customer/dashboard.html";
+            }
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            let parsedError = "Invalid username or password";
 
-                loginButton.disabled =
-                    false;
-
-                loginButton.textContent =
-                    "Login";
-
+            if (typeof errorData.detail === "string") {
+                parsedError = errorData.detail;
+            } else if (Array.isArray(errorData.detail)) {
+                parsedError = errorData.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(", ");
+            } else if (typeof errorData.detail === "object" && errorData.detail !== null) {
+                parsedError = errorData.detail.msg || errorData.detail.message || JSON.stringify(errorData.detail);
             }
 
+            if (errorMsg) {
+                errorMsg.textContent = parsedError;
+                errorMsg.style.display = "block";
+            }
         }
-    );
-
-}
-
-// =====================================================
-// REDIRECT BY ROLE
-// =====================================================
-
-function redirectByRole(role) {
-    const roleName = typeof role === "string" ? role : (role?.name || "CUSTOMER");
-    const upperRole = String(roleName).toUpperCase();
-
-    if (upperRole === "SUPERADMIN") {
-        window.location.href = "../superadmin/dashboard.html";
-    } else if (upperRole === "ADMIN") {
-        window.location.href = "../admin/dashboard.html";
-    } else {
-        window.location.href = "../customer/dashboard.html";
+    } catch (err) {
+        console.error("LOGIN ERROR:", err);
+        if (errorMsg) {
+            errorMsg.textContent = "Unable to connect to backend server";
+            errorMsg.style.display = "block";
+        }
     }
-}
-
-// =====================================================
-// SHOW MESSAGE
-// =====================================================
-
-function showMessage(
-    text,
-    type
-) {
-
-    if (!message) {
-
-        alert(text);
-
-        return;
-
-    }
-
-    message.textContent =
-        text;
-
-    message.className =
-        `message ${type}`;
-
 }

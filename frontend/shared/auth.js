@@ -4,192 +4,140 @@ if (typeof API_URL === "undefined") {
     var API_URL = "http://127.0.0.1:8000";
 }
 
-function getAccessToken() {
-    return localStorage.getItem("access_token") || localStorage.getItem("token");
-}
-
+// Global safe fetch wrapper
 async function authFetch(url, options = {}) {
-    const token = getAccessToken();
-
-    if (!options.headers) {
-        options.headers = {};
-    }
-
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    options.headers = options.headers || {};
+    
     if (token) {
         options.headers["Authorization"] = `Bearer ${token}`;
     }
 
-    if (options.body && typeof options.body === "object" && !(options.body instanceof FormData)) {
-        options.headers["Content-Type"] = "application/json";
+    const response = await fetch(url, options);
+
+    if (response.status === 401) {
+        // Clear tokens on unauthorized API calls
+        localStorage.removeItem("token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user");
     }
 
-    try {
-        const response = await fetch(url, options);
+    return response;
+}
 
-        if (response.status === 401 || response.status === 403) {
-            console.warn("Unauthorized access.");
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("token");
-            window.location.href = "/frontend/auth/login.html";
-            return null;
-        }
-
-        return response;
-    } catch (err) {
-        console.error("AUTHFETCH NETWORK ERROR:", err);
-        throw err;
+// Get dashboard URL based on user role
+function getDashboardUrl(role) {
+    const normalizedRole = String(role || "").toUpperCase();
+    if (normalizedRole === "SUPERADMIN") {
+        return "/frontend/superadmin/dashboard.html";
+    } else if (normalizedRole === "ADMIN") {
+        return "/frontend/admin/dashboard.html";
+    } else if (normalizedRole === "SELLER") {
+        return "/frontend/seller/dashboard.html";
+    } else {
+        return "/frontend/customer/dashboard.html";
     }
 }
 
-async function protectPage(allowedRoles = []) {
-    const token = getAccessToken();
-
-    if (!token) {
-        window.location.href = "/frontend/auth/login.html";
-        return null;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-                "Authorization": `Bearer ${token}`
+// Redirect user to their corresponding dashboard
+function redirectToDashboard(role) {
+    let targetRole = role;
+    if (!targetRole) {
+        try {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                targetRole = (user.role && user.role.name) ? user.role.name : (user.role || "");
             }
-        });
-
-        if (!response.ok) {
-            window.location.href = "/frontend/auth/login.html";
-            return null;
-        }
-
-        const user = await response.json();
-
-        if (allowedRoles.length > 0) {
-            const userRole = user.role ? (user.role.name || user.role) : "";
-            if (!allowedRoles.includes(String(userRole).toUpperCase())) {
-                alert("Unauthorized access!");
-                window.location.href = "/frontend/auth/login.html";
-                return null;
-            }
-        }
-
-        return user;
-    } catch (err) {
-        console.error("AUTH CHECK FAILED:", err);
-        window.location.href = "/frontend/auth/login.html";
-        return null;
+        } catch (e) {}
     }
+    window.location.href = getDashboardUrl(targetRole);
 }
 
+// Verify logged-in user helper
+async function verifyUser() {
+    return await protectPage();
+}
+
+// Global logout function
 function logoutUser() {
-    localStorage.removeItem("access_token");
     localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
     localStorage.removeItem("user");
+    localStorage.removeItem("customer_profile_details");
     window.location.href = "/frontend/auth/login.html";
 }
 
-function redirectByRole(role) {
-    // Extract role string if passed as an object (e.g., { name: 'CUSTOMER' })
-    let roleStr = role;
-    if (role && typeof role === "object") {
-        roleStr = role.name || role.role || "";
-    }
-
-    const userRole = String(roleStr || "").toUpperCase();
-
-    switch (userRole) {
-        case "SUPERADMIN":
-            window.location.href = "/frontend/superadmin/dashboard.html";
-            break;
-        case "ADMIN":
-            window.location.href = "/frontend/admin/dashboard.html";
-            break;
-        case "SELLER":
-            window.location.href = "/frontend/seller/dashboard.html";
-            break;
-        case "CUSTOMER":
-        default:
-            window.location.href = "/frontend/index.html"; // <-- Updated path
-            break;
-    }
+// Alias for logout
+function logout() {
+    logoutUser();
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("loginForm");
-    const message = document.getElementById("message");
+// Page protection with role verification
+async function protectPage(allowedRoles = []) {
+    const currentPath = window.location.pathname.toLowerCase();
+    
+    // ALLOW GUEST ACCESS FOR PUBLIC CATALOG PAGES
+    if (currentPath.includes("index.html") || currentPath.endsWith("/customer/dashboard.html") || currentPath === "/" || currentPath.endsWith("/frontend/")) {
+        const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+        if (!token) return null; // Guest user
+    }
 
-    if (!loginForm) return;
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+    const userStr = localStorage.getItem("user");
 
-    loginForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value;
-
-        if (!username || !password) {
-            if (message) {
-                message.textContent = "Please enter username and password.";
-                message.className = "message error";
-            }
-            return;
+    if (!token) {
+        // Only redirect to login if accessing protected pages like orders.html
+        if (!currentPath.includes("index.html") && !currentPath.endsWith("/customer/dashboard.html")) {
+            window.location.href = "/frontend/auth/login.html";
         }
+        return null;
+    }
 
-        const loginButton = loginForm.querySelector("button[type='submit']");
-        if (loginButton) {
-            loginButton.disabled = true;
-            loginButton.textContent = "Logging in...";
-        }
-
+    let user = null;
+    if (userStr) {
         try {
-            const formData = new URLSearchParams();
-            formData.append("username", username);
-            formData.append("password", password);
+            user = JSON.parse(userStr);
+        } catch (e) {
+            user = null;
+        }
+    }
 
-            const response = await fetch(`${API_URL}/auth/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: formData.toString()
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || "Invalid credentials.");
+    // If user object or user role is missing from localStorage, fetch /auth/me
+    let userRole = (user && user.role && user.role.name) ? user.role.name : (user && user.role ? user.role : "");
+    if (!user || !userRole) {
+        try {
+            const res = await authFetch(`${API_URL}/auth/me`);
+            if (res && res.ok) {
+                const meData = await res.json();
+                user = { ...(user || {}), ...meData };
+                localStorage.setItem("user", JSON.stringify(user));
+                userRole = (user.role && user.role.name) ? user.role.name : (user.role || "");
             }
+        } catch (err) {
+            console.error("Error fetching user profile in protectPage:", err);
+        }
+    }
 
-            const data = await response.json();
+    if (!user) {
+        if (!currentPath.includes("index.html") && !currentPath.endsWith("/customer/dashboard.html")) {
+            window.location.href = "/frontend/auth/login.html";
+        }
+        return null;
+    }
 
-            const token = data.access_token || data.token;
-            if (token) {
-                localStorage.setItem("access_token", token);
-            }
+    if (allowedRoles.length > 0) {
+        const normalizedRoles = allowedRoles.map(r => String(r).toUpperCase());
+        const currentUserRole = String(userRole || "").toUpperCase();
 
-            if (data.user) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-            }
-
-            if (message) {
-                message.textContent = "Login successful. Redirecting...";
-                message.className = "message success";
-            }
-
-            setTimeout(function () {
-                // Safely resolve user role from token payload or user object
-                const userRole = data.role || (data.user ? (data.user.role?.name || data.user.role) : "CUSTOMER");
-                redirectByRole(userRole);
-            }, 500);
-
-        } catch (error) {
-            console.error("LOGIN ERROR:", error);
-            if (message) {
-                message.textContent = error.message || "Login failed.";
-                message.className = "message error";
-            }
-
-            if (loginButton) {
-                loginButton.disabled = false;
-                loginButton.textContent = "Login";
+        if (!normalizedRoles.includes(currentUserRole)) {
+            console.warn("Role mismatch for page access. User role:", currentUserRole, "Allowed:", allowedRoles);
+            if (!currentPath.includes("index.html") && !currentPath.endsWith("/customer/dashboard.html")) {
+                redirectToDashboard(currentUserRole);
+                return null;
             }
         }
-    });
-});
+    }
+
+    return user;
+}
