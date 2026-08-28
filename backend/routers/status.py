@@ -21,30 +21,15 @@ router = APIRouter(
 # GET ALL STATUSES
 # GET /status
 #
-# ALLOWED:
-# SUPERADMIN
-# ADMIN
-# SELLER
-# CUSTOMER
+# PUBLIC ACCESS
 # =====================================================
 
 @router.get("")
 def get_statuses(
-
-    db: Session = Depends(get_db),
-
-    current_user = Depends(
-        require_roles(
-            "SUPERADMIN",
-            "ADMIN",
-            "SELLER",
-            "CUSTOMER"
-        )
-    )
-
+    db: Session = Depends(get_db)
 ):
-
     statuses = db.query(Status).all()
+
 
     return {
         "message": "Statuses Retrieved",

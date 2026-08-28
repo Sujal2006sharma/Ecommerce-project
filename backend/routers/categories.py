@@ -92,11 +92,7 @@ def create_category(
 # GET ALL CATEGORIES
 # GET /categories
 #
-# ALLOWED:
-# SUPERADMIN
-# ADMIN
-# SELLER
-# CUSTOMER
+# PUBLIC ACCESS (GUESTS & ALL ROLES)
 # =====================================================
 
 @router.get(
@@ -104,20 +100,8 @@ def create_category(
     response_model=list[CategoryResponse]
 )
 def get_categories(
-
-    db: Session = Depends(get_db),
-
-    current_user = Depends(
-        require_roles(
-            "SUPERADMIN",
-            "ADMIN",
-            "SELLER",
-            "CUSTOMER"
-        )
-    )
-
+    db: Session = Depends(get_db)
 ):
-
     return db.query(Category).all()
 
 
@@ -125,11 +109,7 @@ def get_categories(
 # GET SINGLE CATEGORY
 # GET /categories/{category_id}
 #
-# ALLOWED:
-# SUPERADMIN
-# ADMIN
-# SELLER
-# CUSTOMER
+# PUBLIC ACCESS (GUESTS & ALL ROLES)
 # =====================================================
 
 @router.get(
@@ -137,31 +117,17 @@ def get_categories(
     response_model=CategoryResponse
 )
 def get_category(
-
     category_id: int,
-
-    db: Session = Depends(get_db),
-
-    current_user = Depends(
-        require_roles(
-            "SUPERADMIN",
-            "ADMIN",
-            "SELLER",
-            "CUSTOMER"
-        )
-    )
-
+    db: Session = Depends(get_db)
 ):
-
     category = db.query(Category).filter(
         Category.id == category_id
     ).first()
 
     if not category:
-
         raise HTTPException(
             status_code=404,
-            detail="Category Not Found"
+            detail="Category not found"
         )
 
     return category

@@ -98,13 +98,4 @@ class Product(Base):
         "ProductImage",
         back_populates="product",
         cascade="all, delete-orphan"
-    )
-
-    # =================================================
-    # STATUS RELATIONSHIP
-    # =================================================
-
-    status = relationship(
-        "Status",
-        back_populates="products"
-    )
+    )

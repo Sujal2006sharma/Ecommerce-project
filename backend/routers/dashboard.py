@@ -29,8 +29,9 @@ def get_dashboard_stats(
 
     # TOTAL STOCK
     total_stock = (
-        db.query(func.coalesce(func.sum(Product.stock), 0)).scalar()
+        db.query(func.coalesce(func.sum(Product.quantity), 0)).scalar()
     )
+
 
     # TOTAL REVENUE
     total_revenue = (
