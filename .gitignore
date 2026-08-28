@@ -20,6 +20,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 develop-eggs/
@@ -57,3 +58,8 @@ dist/
 out/
 coverage/
 *.lcov
+
+start_all.bat
+start_backend.bat
+start_frontend.bat
+start_mysql.bat
